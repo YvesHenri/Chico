@@ -1,0 +1,153 @@
+#ifndef ENTITIES_COMPONENT_COLLECTION_IMPL
+#define ENTITIES_COMPONENT_COLLECTION_IMPL
+
+#include <vector>
+
+namespace ecs
+{
+	/**
+	* @brief Sparse set implementation.
+	*/
+	class Collection
+	{
+	public:
+		using Item = unsigned;
+		using Index = unsigned;
+		using Iterator = std::vector<Item>::iterator;
+
+		Collection() = default;
+		Collection(const Collection&) = delete; // No copying
+		Collection(Collection&&) = default;
+		virtual ~Collection() = default;
+
+		virtual bool empty() const {
+			return values.empty();
+		}
+		
+		virtual void clear() {
+			values.clear();
+			indices.clear();
+		}
+
+		virtual bool add(Item item) {
+			auto exists = contains(item);
+
+			if (!exists) {
+				if (item >= indices.size()) {
+					indices.resize(item + 1U);
+				}
+				indices[item] = values.size() | OCCUPIED;
+				values.push_back(item);
+			}
+
+			return !exists;
+		}
+
+		virtual bool remove(Item item) {
+			auto exists = contains(item);
+
+			if (exists) {
+				auto last = values.back();
+				auto index = indices[item] & ~OCCUPIED;
+
+				indices[last] = index | OCCUPIED;
+				indices[item] = 0U;
+
+				values[index] = last;
+				values.pop_back();
+			}
+
+			return exists;
+		}
+
+		virtual bool contains(Item item) const {
+			return item < indices.size() && (indices[item] & OCCUPIED) != 0U;
+		}
+
+		unsigned size() const {
+			return values.size();
+		}
+
+		Iterator begin() {
+			return values.begin();
+		}
+
+		Iterator end() {
+			return values.end();
+		}
+
+	protected:
+		static const int OCCUPIED = 0x01000000;
+		std::vector<Item> values; // Where the actual values are stored (dense set)
+		std::vector<Index> indices; // Where the indices to values are stored (sparse set)
+	};
+
+	/**
+	* @brief Extended sparse set implementation for components.
+	*
+	* This specialization of a sparse set associates a component to an entity. The
+	* main purpose of this class is to use sparse sets to store components.
+	* It guarantees fast access both to the components and to the entities.
+	*
+	* @note
+	* Entities and components have the same order. It's guaranteed both in case of raw
+	* access (either to entities or components) and when using input iterators.
+	*
+	* @note
+	* Internal data structures arrange elements to maximize performance. Because of
+	* that, there are no guarantees that elements have the expected order when
+	* iterate directly the internal packed array (see `raw` and `size` member
+	* functions for that). Use `begin` and `end` instead.
+	*
+	* @tparam Component Type of component assigned to the entities.
+	*/
+	template <typename Component>
+	class ComponentCollection final : public Collection
+	{
+	public:
+		ComponentCollection() = default;
+		ComponentCollection(const ComponentCollection&) = delete;
+		ComponentCollection(ComponentCollection&&) = default;
+
+		void clear() override {
+			components.clear();
+			Collection::clear();
+		}
+
+		bool reset(Collection::Item item) {
+			return contains(item) ? remove(item) : false;
+		}
+
+		bool remove(Collection::Item item) override {
+			auto removed = Collection::remove(item);
+
+			if (removed) {
+				components[indices[item] & ~OCCUPIED] = std::move(components.back());
+				components.pop_back();
+			}
+
+			return removed;
+		}
+
+		bool add(Collection::Item item, const Component& component) {
+			return Collection::add(item) ? components.emplace_back(component), true : false; // Execute and return
+		}
+
+		bool replace(Collection::Item item, const Component& component) {
+			return contains(item) ? components[indices[item] & ~OCCUPIED] = component, true : false; // Execute and return
+		}
+
+		bool save(Collection::Item item, const Component& component) {
+			return contains(item) ? replace(item, component) : add(item, component);
+		}
+
+		Component& get(Collection::Item item) {
+			return components[indices[item] & ~OCCUPIED];
+		}
+
+	private:
+		std::vector<Component> components;
+	};
+}
+
+#endif
