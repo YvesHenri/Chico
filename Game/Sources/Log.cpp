@@ -19,6 +19,7 @@ void Log::print(const Log& log, const char* filePath, int fileLine, const char* 
     if (currentLevel <= log.level) {
         std::tm tm;
         std::time_t time = std::time(0);
+        std::va_list args;
         std::string buffer(18, '\0');
         std::string fileName(strrchr(filePath, '\\') ? strrchr(filePath, '\\') + 1 : filePath);
 
@@ -26,7 +27,9 @@ void Log::print(const Log& log, const char* filePath, int fileLine, const char* 
         std::strftime(&buffer[0], buffer.size(), "%d/%m/%y %H:%M:%S", &tm);
         SetConsoleTextAttribute(CONSOLE, log.color);
         printf("[%s %s %s:%d] ", buffer.c_str(), log.name, fileName.c_str(), fileLine);
-        printf(message);
+        va_start(args, message);
+        vprintf(message, args);
+        va_end(args);
         printf("\n");
         SetConsoleTextAttribute(CONSOLE, 7);
     }

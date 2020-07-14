@@ -2,12 +2,12 @@
 
 void SplashState::onEnter()
 {
-	INFO("<----- Splash");
+	INFO("-----> Splash");
 }
 
 void SplashState::onLeave()
 {
-	INFO("-----> Splash");
+	INFO("<----- Splash");
 }
 
 void SplashState::onEvent(const sf::Event& event)

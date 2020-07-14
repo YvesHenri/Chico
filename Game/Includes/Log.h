@@ -6,6 +6,7 @@
 #include <ctime>
 #include <cstring>
 #include <mutex>
+#include <cstdarg>
 
 class Log
 {

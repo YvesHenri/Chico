@@ -77,5 +77,8 @@
     <ClInclude Include="Includes\Message\UnpauseGameMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\Resource\ResourceStore.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

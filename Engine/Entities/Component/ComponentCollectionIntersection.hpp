@@ -14,9 +14,16 @@ namespace ecs
 	class ComponentCollectionIntersection final
 	{
 	public:
-		class Iterator final : public std::iterator<std::input_iterator_tag, std::uint32_t>
+		class Iterator final //: public std::iterator<std::input_iterator_tag, std::uint32_t>
 		{
 		public:
+			// C++17 iterator traits
+			using difference_type = unsigned;
+			using value_type = unsigned;
+			using pointer = const unsigned*;
+			using reference = const unsigned&;
+			using iterator_category = std::input_iterator_tag;
+
 			Iterator(std::vector<ecs::Collection*> others, ecs::Collection::Iterator begin, ecs::Collection::Iterator end)
 				: collections(others)
 				, begin(begin)

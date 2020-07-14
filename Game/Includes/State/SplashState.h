@@ -8,17 +8,17 @@
 class SplashState final : public State
 {
 public:
-	void onEnter() override;
-	void onLeave() override;
-
-	void onEvent(const sf::Event& event) override;
-	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-
 	sts::StateResult update(float dt) override;
 
+	void onEnter() override;
+	void onLeave() override;
+	void onEvent(const sf::Event& event) override;
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
 private:
-	float m_duration;
-	float m_elapsed;
+	float m_duration = 0.f; // TODO set value
+	float m_elapsed = 0.f;
 
 	sf::Sprite m_sprite;
 	sf::Texture m_texture;
