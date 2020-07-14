@@ -1,0 +1,26 @@
+#include "../../Includes/State/LoadingState.h"
+
+void LoadingState::onEnter()
+{
+	TRACE("-----> Loading");
+}
+
+void LoadingState::onLeave()
+{
+	TRACE("<----- Loading");
+}
+
+void LoadingState::onEvent(const sf::Event& event)
+{
+
+}
+
+void LoadingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+
+}
+
+sts::StateResult LoadingState::update(float dt)
+{
+	return sts::StateResult::Finished; // Change accordingly
+}

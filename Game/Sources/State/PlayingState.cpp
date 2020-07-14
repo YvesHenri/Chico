@@ -1,0 +1,26 @@
+#include "../../Includes/State/PlayingState.h"
+
+void PlayingState::onEnter()
+{
+	ERR("-----> Playing");
+}
+
+void PlayingState::onLeave()
+{
+	ERR("<----- Playing");
+}
+
+void PlayingState::onEvent(const sf::Event& event)
+{
+
+}
+
+void PlayingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+
+}
+
+sts::StateResult PlayingState::update(float dt)
+{
+	return sts::StateResult::Running;
+}
