@@ -27,8 +27,8 @@ namespace ecs
 		}
 
 	private:
-		std::weak_ptr<mqs::MessageManager> messages;
-		std::weak_ptr<ecs::EntityManager> entities;
+		std::shared_ptr<mqs::MessageManager> messages;
+		std::shared_ptr<ecs::EntityManager> entities;
 		std::vector<std::shared_ptr<System>> systems;
 	};
 }

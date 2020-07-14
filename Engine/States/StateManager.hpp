@@ -31,12 +31,12 @@ namespace sts
 
 			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
 			Mapping map(const std::shared_ptr<State>& state) {
-				return map(manager->nodes->get<State>(state));
+				return map(manager->nodes->get<State>(state), false);
 			}
 
 			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
 			Mapping map() {
-				return map(manager->nodes->get<State>());
+				return map(manager->nodes->get<State>(), false);
 			}
 
 			template <typename Message, typename Enable = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
@@ -61,13 +61,15 @@ namespace sts
 			}
 
 		private:
-			Mapping map(const std::shared_ptr<StateNode>& nextNode) {
-				auto result = StateResult::Finished;
-				auto iterator = node->results.find(result);
-
+			Mapping map(const std::shared_ptr<StateNode>& nextNode, bool addFinishedTransition) {
 				// Automatically create a Finished transition if onFinished() wasn't called previously
-				if (iterator == node->results.end()) {
-					node->results[result] = nextNode;
+				if (addFinishedTransition) {
+					auto result = StateResult::Finished;
+					auto iterator = node->results.find(result);
+
+					if (iterator == node->results.end()) {
+						node->results[result] = nextNode;
+					}
 				}
 
 				return Mapping(nextNode, manager);
@@ -164,7 +166,7 @@ namespace sts
 
 		explicit StateManager(const std::shared_ptr<mqs::MessageManager>& messages) {
 			this->messages = messages;
-			this->nodes = std::make_shared<StateNodePool>();
+			this->nodes = std::make_shared<StateNodePool>(messages);
 		}
 
 		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
@@ -177,6 +179,11 @@ namespace sts
 		Mapping map() {
 			node = nodes->get<State>();
 			return Mapping(node, shared_from_this());
+		}
+
+		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
+		bool current() {
+			return std::dynamic_pointer_cast<State>(node->state).operator bool();
 		}
 
 		void update(float dt) {

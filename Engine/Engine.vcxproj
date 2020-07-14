@@ -165,16 +165,11 @@
     <ClInclude Include="Messages\MessageListener.hpp" />
     <ClInclude Include="Messages\MessageManager.hpp" />
     <ClInclude Include="Signals\Signal.hpp" />
-    <ClInclude Include="Logger.hpp" />
     <ClInclude Include="States\State.hpp" />
     <ClInclude Include="States\StateManager.hpp" />
     <ClInclude Include="States\StateNode.hpp" />
     <ClInclude Include="States\StateNodePool.hpp" />
     <ClInclude Include="States\StateResult.hpp" />
-    <ClInclude Include="Extensions.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
