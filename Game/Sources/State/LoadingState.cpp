@@ -22,5 +22,5 @@ void LoadingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 sts::StateResult LoadingState::update(float dt)
 {
-	return sts::StateResult::Finished; // Change accordingly
+	return sts::StateResult::Done; // Change accordingly
 }

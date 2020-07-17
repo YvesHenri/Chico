@@ -22,5 +22,5 @@ void MenuState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 sts::StateResult MenuState::update(float dt)
 {
-	return sts::StateResult::Finished;
+	return sts::StateResult::Done;
 }

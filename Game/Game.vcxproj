@@ -159,12 +159,20 @@
     <ClCompile Include="Sources\State\SplashState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Includes\Component\Body.h" />
+    <ClInclude Include="Includes\Component\KeyboardController.h" />
+    <ClInclude Include="Includes\Component\MouseController.h" />
+    <ClInclude Include="Includes\Component\Render.h" />
+    <ClInclude Include="Includes\Component\Speed.h" />
+    <ClInclude Include="Includes\Component\Transform.h" />
+    <ClInclude Include="Includes\Component\Motion.h" />
+    <ClInclude Include="Includes\Message\EntityCollisionMessage.h" />
+    <ClInclude Include="Includes\Message\GravityChangedMessage.h" />
     <ClInclude Include="Includes\Message\LoadCompleteMessage.h" />
     <ClInclude Include="Includes\Message\LoadProgressMessage.h" />
     <ClInclude Include="Includes\Message\LoadStartMessage.h" />
     <ClInclude Include="Includes\Message\PauseGameMessage.h" />
     <ClInclude Include="Includes\Message\StartGameMessage.h" />
-    <ClInclude Include="Includes\Message\UnpauseGameMessage.h" />
     <ClInclude Include="Includes\Resource\ResourceStore.hpp" />
     <ClInclude Include="Includes\State\LoadingState.h" />
     <ClInclude Include="Includes\State\MenuState.h" />
@@ -173,6 +181,13 @@
     <ClInclude Include="Includes\State\SplashState.h" />
     <ClInclude Include="Includes\State\State.h" />
     <ClInclude Include="Includes\Log.h" />
+    <ClInclude Include="Includes\System\CollisionDetectionSystem.h" />
+    <ClInclude Include="Includes\System\CollisionResolverSystem.h" />
+    <ClInclude Include="Includes\System\DebugSystem.h" />
+    <ClInclude Include="Includes\System\KeyboardControllerSystem.h" />
+    <ClInclude Include="Includes\System\MouseControllerSystem.h" />
+    <ClInclude Include="Includes\System\KinematicSystem.h" />
+    <ClInclude Include="Includes\System\RenderSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

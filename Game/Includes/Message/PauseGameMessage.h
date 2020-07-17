@@ -5,4 +5,6 @@
 struct PauseGameMessage final : public mqs::ManagedMessage<PauseGameMessage>
 {
 	PauseGameMessage() : mqs::ManagedMessage<PauseGameMessage>(0U) {}
+
+	bool pause = true;
 };

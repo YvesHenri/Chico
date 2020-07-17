@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Engine.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollection.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollectionIntersection.hpp" />
     <ClInclude Include="Entities\Component\ComponentView.hpp" />

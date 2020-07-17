@@ -29,17 +29,13 @@ namespace sts
 				manager->node->state->onEnter(); // TODO Check indeterminate state (?)
 			}
 
-			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping map(const std::shared_ptr<State>& state) {
-				return map(manager->nodes->get<State>(state), false);
+			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type, typename... Args>
+			Mapping map(Args&&... stateArgs) {
+				auto nextNode = manager->nodes->add<State>(stateArgs...);
+				return Mapping(nextNode, manager);
 			}
 
-			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping map() {
-				return map(manager->nodes->get<State>(), false);
-			}
-
-			template <typename Message, typename Enable = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
+			template <typename Message, typename Enable = typename std::enable_if<std::is_base_of<mqs::Message, Message>::value>::type>
 			MessageTransition<Message, Enable> onMessage() {
 				return MessageTransition<Message>(node, manager);
 			}
@@ -48,31 +44,16 @@ namespace sts
 				return ReturnTransition(node, manager, result);
 			}
 
-			ReturnTransition onFinished() {
-				return onReturn(StateResult::Finished);
+			ReturnTransition onDone() {
+				return onReturn(StateResult::Done);
 			}
 
-			ReturnTransition onFailed() {
-				return onReturn(StateResult::Failed);
+			ReturnTransition onError() {
+				return onReturn(StateResult::Error);
 			}
 
 			ReturnTransition onRunning() {
 				return onReturn(StateResult::Running);
-			}
-
-		private:
-			Mapping map(const std::shared_ptr<StateNode>& nextNode, bool addFinishedTransition) {
-				// Automatically create a Finished transition if onFinished() wasn't called previously
-				if (addFinishedTransition) {
-					auto result = StateResult::Finished;
-					auto iterator = node->results.find(result);
-
-					if (iterator == node->results.end()) {
-						node->results[result] = nextNode;
-					}
-				}
-
-				return Mapping(nextNode, manager);
 			}
 
 		private:
@@ -103,19 +84,9 @@ namespace sts
 				const sts::StateResult& result) : Transition(node, manager), result(result) {}
 
 			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping go(const std::shared_ptr<State>& state) {
-				return go<State>(manager->nodes->get<State>(state));
-			}
-
-			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
 			Mapping go() {
-				return go<State>(manager->nodes->get<State>());
-			}
-
-		private:
-			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping go(const std::shared_ptr<StateNode>& nextNode) {
-				node->results[result] = nextNode;
+				auto& state = typeid(State);
+				node->results.emplace(result, state);
 				return Mapping(node, manager);
 			}
 
@@ -123,7 +94,7 @@ namespace sts
 			sts::StateResult result;
 		};
 
-		template <typename Message, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
+		template <typename Message, typename = typename std::enable_if<std::is_base_of<mqs::Message, Message>::value>::type>
 		class MessageTransition final : public Transition
 		{
 		public:
@@ -132,35 +103,43 @@ namespace sts
 				const std::shared_ptr<StateManager>& manager) : Transition(node, manager) {}
 
 			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping go(const std::shared_ptr<State>& state) {
-				return go<State>(manager->nodes->get<State>(state));
+			Mapping go(const std::function<bool(const Message&)>& condition) {
+				auto& state = typeid(State);
+				auto& message = typeid(Message);
+
+				//auto optionalCurrentConnetion = node->connections.find(message);
+
+				// Remove current connection (if any), as we're going to create/overwrite it
+				//if (optionalCurrentConnetion != node->connections.end())
+					//optionalCurrentConnetion.second.disconnect();
+
+				auto connection = manager->messages->on<Message>([=](const mqs::Message& message) {
+					auto& concreteMessage = dynamic_cast<const Message&>(message);
+
+					if (manager->active(node->state)) {
+						if (condition(concreteMessage)) {
+							manager->hooked(concreteMessage);
+						}
+					}
+				});
+
+				node->messages.emplace(message, state);
+				node->connections.emplace(message, connection);
+
+				return Mapping(node, manager);
 			}
 
 			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
 			Mapping go() {
-				return go<State>(manager->nodes->get<State>());
-			}
-
-		private:
-			template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-			Mapping go(const std::shared_ptr<StateNode>& nextNode) {
-				// Register listener and create transition
-				if (const auto& messageManager = manager->messages.lock()) {
-					auto connection = messageManager->on<Message>([this](const mqs::Message& message) {
-						manager->hooked(dynamic_cast<const Message&>(message));
-					});
-
-					manager->connections.push_back(connection);
-					node->messages[typeid(Message)] = nextNode;
-				}				
-
-				return Mapping(node, manager);
+				return go<State>([](const Message&) {
+					return true;
+				});
 			}
 		};
 
 		~StateManager() {
-			for (auto& connection : connections) {
-				connection.disconnect();
+			for (auto& pair : connections) {
+				pair.second.disconnect();
 			}
 		}
 
@@ -169,27 +148,28 @@ namespace sts
 			this->nodes = std::make_shared<StateNodePool>(messages);
 		}
 
-		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-		Mapping map(const std::shared_ptr<State>& state) {
-			node = nodes->get<State>(state);
+		// Creates a State in-place and register it.
+		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type, typename... Args>
+		Mapping map(Args&&... stateArgs) {
+			node = nodes->add<State>(stateArgs...);
 			return Mapping(node, shared_from_this());
 		}
 
 		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-		Mapping map() {
-			node = nodes->get<State>();
-			return Mapping(node, shared_from_this());
-		}
-
-		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
-		bool current() {
+		bool active() {
 			return std::dynamic_pointer_cast<State>(node->state).operator bool();
 		}
 
-		void update(float dt) {
-			auto result = node->state->update(dt);
+		template <typename State, typename = typename std::enable_if<std::is_base_of<sts::State, State>::value>::type>
+		bool active(const std::shared_ptr<State>& unused) {
+			return std::dynamic_pointer_cast<State>(node->state).operator bool();
+		}
+
+		void update(float delta) {
+			auto result = node->state->update(delta);
 			auto iterator = node->results.find(result);
 
+			// Check whether there's a mapped transition
 			if (iterator != node->results.end()) {
 				transit(iterator->second);
 			}
@@ -197,25 +177,33 @@ namespace sts
 
 	private:
 		void hooked(const mqs::Message& message) {
+			printf("inside hooked\n");
 			auto& type = typeid(message);
 			auto iterator = node->messages.find(type);
 
+			// Check whether there's a mapped transition
 			if (iterator != node->messages.end()) {
 				transit(iterator->second);
 			}
 		}
 
-		void transit(const std::shared_ptr<StateNode>& nextNode) {
-			node->state->onLeave();
-			node = nextNode;
-			node->state->onEnter();
+		void transit(const std::type_index& state) {
+			auto transition = nodes->get(state);
+
+			// Check whether there's a corresponding transition instance
+			if (transition) {
+				node->state->onLeave();
+				node = transition;
+				node->state->onEnter();
+			}
 		}
 
 	private:
 		std::shared_ptr<sts::StateNode> node;
 		std::shared_ptr<sts::StateNodePool> nodes;
-		std::weak_ptr<mqs::MessageManager> messages;
-		std::vector<mqs::SignalConnection> connections;
+		std::shared_ptr<mqs::MessageManager> messages;
+		//std::vector<mqs::SignalConnection> connections;
+		std::unordered_map<std::type_index, mqs::SignalConnection> connections;
 	};
 }
 

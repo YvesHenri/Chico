@@ -32,14 +32,14 @@ void PausedState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 	// The overlap rectangle has to be drawn using the fixed view
 	sf::View fixed = target.getDefaultView();
-	sf::View current = target.getView();
+	sf::View active = target.getView();
 
 	target.setView(fixed);
 	target.draw(overlap, states);
-	target.setView(current);
+	target.setView(active);
 }
 
 sts::StateResult PausedState::update(float dt)
 {
-	return sts::StateResult::Running; // Change accordingly
+	return sts::StateResult::Running;
 }

@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <filesystem> // C++17
 #include <typeindex>
+#include <locale> 
+#include <algorithm>
 
 #include "../Log.h"
 
@@ -26,10 +28,15 @@ public:
 			for (const auto& entry : std::filesystem::recursive_directory_iterator(resourceFolder)) {
 				if (entry.is_regular_file()) {
 					auto path = entry.path().string();
-					auto name = entry.path().filename().string();
+					auto name = entry.path().filename().string();					
 					
+					//std::transform(name.begin(), name.end(), name.begin(), std::tolower);
+
 					if (resources.emplace(name, allocator(path)).second) {
 						TRACE("Stored resource %s", path.c_str());
+					}
+					else {
+						WARN("Skipped resource %s", path.c_str());
 					}
 				}
 			}

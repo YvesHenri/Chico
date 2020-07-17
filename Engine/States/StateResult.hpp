@@ -3,10 +3,10 @@
 
 namespace sts
 {
-	enum class StateResult
+	enum class StateResult : unsigned
 	{
-		Finished,
-		Failed,
+		Done,
+		Error,
 		Running
 	};
 }

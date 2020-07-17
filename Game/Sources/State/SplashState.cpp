@@ -25,7 +25,7 @@ sts::StateResult SplashState::update(float delta)
 	m_elapsed += delta;
 
 	if (m_elapsed >= m_duration) {
-		return sts::StateResult::Finished;
+		return sts::StateResult::Done;
 	}
 	else {
 		return sts::StateResult::Running;

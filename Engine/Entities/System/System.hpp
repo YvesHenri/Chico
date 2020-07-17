@@ -9,15 +9,16 @@ namespace ecs
 	class System
 	{
 	public:
-		virtual void update(float dt) = 0;
-		virtual void configure(const std::weak_ptr<ecs::EntityManager>& entities, const std::weak_ptr<mqs::MessageManager>& messages) {
+		virtual void draw(float delta) = 0;
+		virtual void update(float delta) = 0;
+		virtual void configure(const std::shared_ptr<ecs::EntityManager>& entities, const std::shared_ptr<mqs::MessageManager>& messages) {
 			this->messages = messages;
 			this->entities = entities;
 		}
 
 	protected:
-		std::weak_ptr<mqs::MessageManager> messages;
-		std::weak_ptr<ecs::EntityManager> entities;
+		std::shared_ptr<mqs::MessageManager> messages;
+		std::shared_ptr<ecs::EntityManager> entities;
 	};
 
 	// Definition
@@ -30,19 +31,18 @@ namespace ecs
 	{
 	public:
 		virtual ~SystemListener() {
-			connection.disconnect();
-		}
-
-		void configure(const std::weak_ptr<ecs::EntityManager>& entities, const std::weak_ptr<mqs::MessageManager>& messages) override {
-			System::configure(entities, messages);
-
-			if (const auto& pointer = messages.lock()) {
-				connection = pointer->on<T>(this);
+			for (auto& connection : connections) {
+				connection.disconnect();
 			}
 		}
 
+		void configure(const std::shared_ptr<ecs::EntityManager>& entities, const std::shared_ptr<mqs::MessageManager>& messages) override {
+			System::configure(entities, messages);
+			connections.push_back(messages->on<T>(this));
+		}
+
 	private:
-		mqs::SignalConnection connection;
+		std::vector<mqs::SignalConnection> connections; // Avoid copy problems
 	};
 
 	// 1+ arguments specialization
@@ -56,13 +56,10 @@ namespace ecs
 			}
 		}
 
-		void configure(const std::weak_ptr<ecs::EntityManager>& entities, const std::weak_ptr<mqs::MessageManager>& messages) override {
+		void configure(const std::shared_ptr<ecs::EntityManager>& entities, const std::shared_ptr<mqs::MessageManager>& messages) override {
 			System::configure(entities, messages);
-
-			if (const auto& pointer = messages.lock()) {
-				connections.push_back(pointer->on<T>(this));
-				connections.push_back(pointer->on<Tn...>(this));
-			}
+			connections.push_back(messages->on<T>(this));
+			connections.push_back(messages->on<Tn...>(this));
 		}
 
 	private:
