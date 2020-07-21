@@ -160,14 +160,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\Component\Body.h" />
-    <ClInclude Include="Includes\Component\KeyboardController.h" />
-    <ClInclude Include="Includes\Component\MouseController.h" />
+    <ClInclude Include="Includes\Component\Camera.h" />
+    <ClInclude Include="Includes\Component\Joystick.h" />
     <ClInclude Include="Includes\Component\Render.h" />
-    <ClInclude Include="Includes\Component\Speed.h" />
     <ClInclude Include="Includes\Component\Transform.h" />
     <ClInclude Include="Includes\Component\Motion.h" />
-    <ClInclude Include="Includes\Message\EntityCollisionMessage.h" />
-    <ClInclude Include="Includes\Message\GravityChangedMessage.h" />
+    <ClInclude Include="Includes\Message\CameraChanged.h" />
+    <ClInclude Include="Includes\Message\Collision.h" />
+    <ClInclude Include="Includes\Message\Explosion.h" />
     <ClInclude Include="Includes\Message\LoadCompleteMessage.h" />
     <ClInclude Include="Includes\Message\LoadProgressMessage.h" />
     <ClInclude Include="Includes\Message\LoadStartMessage.h" />
@@ -181,11 +181,11 @@
     <ClInclude Include="Includes\State\SplashState.h" />
     <ClInclude Include="Includes\State\State.h" />
     <ClInclude Include="Includes\Log.h" />
+    <ClInclude Include="Includes\System\CameraSystem.h" />
     <ClInclude Include="Includes\System\CollisionDetectionSystem.h" />
     <ClInclude Include="Includes\System\CollisionResolverSystem.h" />
     <ClInclude Include="Includes\System\DebugSystem.h" />
-    <ClInclude Include="Includes\System\KeyboardControllerSystem.h" />
-    <ClInclude Include="Includes\System\MouseControllerSystem.h" />
+    <ClInclude Include="Includes\System\JoystickSystem.h" />
     <ClInclude Include="Includes\System\KinematicSystem.h" />
     <ClInclude Include="Includes\System\RenderSystem.h" />
   </ItemGroup>

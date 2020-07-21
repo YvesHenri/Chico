@@ -15,6 +15,7 @@
 #include "Includes/State/PausedState.h"
 
 // Messaging
+#include "Includes/Message/Explosion.h"
 #include "Includes/Message/StartGameMessage.h"
 #include "Includes/Message/PauseGameMessage.h"
 #include "Includes/Message/LoadStartMessage.h"
@@ -24,13 +25,12 @@
 // Systems
 #include "Includes/System/KinematicSystem.h"
 #include "Includes/System/RenderSystem.h"
-#include "Includes/System/KeyboardControllerSystem.h"
-#include "Includes/System/MouseControllerSystem.h"
+#include "Includes/System/JoystickSystem.h"
 #include "Includes/System/DebugSystem.h"
 #include "Includes/System/CollisionResolverSystem.h"
 #include "Includes/System/CollisionDetectionSystem.h"
+#include "Includes/System/CameraSystem.h"
 
-#include "Includes/Factory/EntityFactory.h"
 #include "Includes/Resource/ResourceStore.hpp"
 
 #ifdef _DEBUG
@@ -42,10 +42,24 @@
 #define ENTRY_POINT int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif
 
+float vx = 400.f;
+float vy = 300.f;
+float o1x = 50.f;
+float o1y = 100.f;
+float o2x = 500.f;
+float o2y = 250.f;
+float o3x = 700.f;
+float o3y = 500.f;
+
+sf::VertexArray perlim;
+
+void x() {
+
+}
+
 ENTRY_POINT
 {
 	// SFML startup
-	auto fps = sf::Text();
 	auto clock = sf::Clock();
 	auto video = sf::VideoMode(800U, 600U);
 	auto window = std::make_shared<sf::RenderWindow>(video, "", sf::Style::Titlebar | sf::Style::Close);
@@ -66,7 +80,7 @@ ENTRY_POINT
 	// Resources startup: Textures
 	TextureStore::load("Resources\\Images", [](const std::string& path) {
 		sf::Texture texture;
-		//texture.loadFromFile(path);
+		texture.loadFromFile(path);
 		return texture;
 	});
 
@@ -88,22 +102,13 @@ ENTRY_POINT
 		.map<PausedState>().onMessage<PauseGameMessage>().go<PlayingState>()
 		.done();
 
-	systems->add<MouseControllerSystem>(*window.get());
-	systems->add<KeyboardControllerSystem>();
+	systems->add<JoystickSystem>(window);
 	systems->add<KinematicSystem>();
 	systems->add<CollisionDetectionSystem>();
 	systems->add<CollisionResolverSystem>();
+	systems->add<CameraSystem>(window);
 	systems->add<RenderSystem>(window);
 	systems->add<DebugSystem>(window);
-	
-	auto player = entities->create();
-
-	player.assign<KeyboardController>();
-	//player.assign<MouseController>();
-	player.assign<Motion>();
-	player.assign<Body>(30.f);
-	player.assign<Transform>(400.f, 300.f);
-	player.assign<Render>(sf::Color::Red);
 
 	// SFML window setup
 	window->setMouseCursorVisible(true);
@@ -111,9 +116,33 @@ ENTRY_POINT
 	window->setVerticalSyncEnabled(false);
 	window->setFramerateLimit(60);
 
-	fps.setFont(FontStore::get("Carlito.ttf"));
-	fps.setCharacterSize(16U);
-	fps.setPosition(5.f, 5.f);
+	auto player = entities->create();
+
+	player.assign<Body>(30.f);
+	player.assign<Motion>();
+	player.assign<Joystick>();
+	player.assign<Camera>();
+	player.assign<Transform>(200.f, 300.f);
+	player.assign<Render>(sf::Color::Red);
+
+	auto enemy = entities->create();
+
+	enemy.assign<Body>(rand() % 10 + 30);
+	enemy.assign<Motion>();
+	enemy.assign<Transform>(600.f, 300.f);
+	enemy.assign<Render>(sf::Color::Yellow);
+
+	sf::Sprite o1;
+	o1.setTexture(TextureStore::get("1.png"));
+	o1.setPosition(o1x, o1y);
+
+	sf::Sprite o2;
+	o2.setTexture(TextureStore::get("2.png"));
+	o2.setPosition(o2x, o2y);
+
+	sf::Sprite o3;
+	o3.setTexture(TextureStore::get("3.png"));
+	o3.setPosition(o3x, o3y);
 
 	while (window->isOpen())
 	{
@@ -133,32 +162,68 @@ ENTRY_POINT
 				case sf::Mouse::Left:
 				{
 					auto e = entities->create();
+					auto v = window->getView().getViewport();
+					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 					e.assign<Body>(rand() % 50 + 30);
-					e.assign<Motion>(); // rand() % 10 + 10);
+					e.assign<Motion>();
 					e.assign<Render>(sf::Color(rand() % 255, rand() % 255, rand() % 255));
-					e.assign<Transform>(event.mouseButton.x, event.mouseButton.y);
-				}
-					break;
-				case sf::Mouse::Right:
+					e.assign<Transform>(p.x, p.y);
 					break;
 				}
+				}
+				break;
 			case sf::Event::KeyPressed:
 				switch (event.key.code)
 				{
 				case sf::Keyboard::Return:
+				{
 					messages->publish<StartGameMessage>();
+
+					// Toggle controller type
+					switch (player.component<Joystick>().type)
+					{
+					case Joystick::Type::Mouse:
+						player.component<Joystick>().type = Joystick::Type::Keyboard;
+						break;
+					case Joystick::Type::Keyboard:
+						player.component<Joystick>().type = Joystick::Type::Mouse;
+						break;
+					}
+					break;
+				}
+				case sf::Keyboard::Num1:
+					player.assign<Camera>();
+					enemy.remove<Camera>();
+					messages->publish<CameraChanged>();
 					break;
 				case sf::Keyboard::Num2:
+					player.remove<Camera>();
+					enemy.assign<Camera>();
+					messages->publish<CameraChanged>();
 					break;
 				case sf::Keyboard::Num3:
 					break;
 				case sf::Keyboard::Num4:
+					break;
+				case sf::Keyboard::Num8:
+					messages->publish<Explosion>(/*rand() % 50 + 100*/ 25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
+					break;
+				case sf::Keyboard::Num9:
+					messages->publish<Explosion>(/*rand() % 50 + 100*/ 25.f, player.component<Transform>().x, player.component<Transform>().y);
 					break;
 				case sf::Keyboard::Escape:
 					messages->publish<PauseGameMessage>();
 					break;
 				case sf::Keyboard::Space:
 					window->close();
+					break;
+				case sf::Keyboard::Up:
+					break;
+				case sf::Keyboard::Down:
+					break;
+				case sf::Keyboard::Left:
+					break;
+				case sf::Keyboard::Right:
 					break;
 				}
 				break;
@@ -167,11 +232,12 @@ ENTRY_POINT
 
 		float delta = clock.restart().asSeconds();
 
-		window->clear(sf::Color(128, 128, 128));
+		window->clear(sf::Color(128, 128, 128));		
 		systems->update(delta);
 		states->update(delta);
-		fps.setString(std::to_string(1.f / delta));
-		window->draw(fps);
+		window->draw(o1);
+		window->draw(o2);
+		window->draw(o3);	
 		window->display();
 	}
 

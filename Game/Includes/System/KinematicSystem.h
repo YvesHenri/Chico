@@ -6,9 +6,8 @@
 #include "../Component/Transform.h"
 #include "../Component/Motion.h"
 #include "../Component/Body.h"
-#include "../Message/GravityChangedMessage.h"
 
-class KinematicSystem : public ecs::SystemListener<GravityChangedMessage>
+class KinematicSystem : public ecs::System
 {
 public:
 	void draw(float delta) override {}
@@ -31,10 +30,6 @@ public:
 				motion.vy = 0.f;
 			}
 		});
-	}
-
-	void handle(const GravityChangedMessage& message) {
-		gravity = message.gravity;
 	}
 
 private:

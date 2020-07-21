@@ -31,21 +31,27 @@ public:
 		line.setOutlineThickness(1.f);
 		line.setOutlineColor(sf::Color::Black);
 
-		entities->each<Body, Render, Transform>([&](auto& e, auto& body, auto& render, auto& transform) {
+		entities->each<Body, Render, Transform>([&](auto& entity, auto& body, auto& render, auto& transform) {
+			// Entity shape
 			shape.setRadius(body.radius);
 			shape.setOrigin(shape.getRadius(), shape.getRadius());
 			shape.setPosition(transform.x, transform.y);
 			shape.setFillColor(render.color);
-			text.setString(std::to_string(e.id()));
+
+			// Entity identifier
+			text.setString(std::to_string(entity.id()));
 			auto rect = text.getLocalBounds();
 			text.setOrigin(rect.left + rect.width / 2.0f, rect.top + rect.height / 2.0f); // width / 2, height / 2
 			text.setPosition(transform.x, transform.y);
+
+			// Entity rotation cue
 			line.setPosition(transform.x, transform.y);
 			line.setSize(sf::Vector2f(-body.radius, 0.f));
 			line.setRotation(transform.rotation);
+
 			window->draw(shape);
-			window->draw(line);
 			window->draw(text);
+			window->draw(line);
 		});
 	}
 

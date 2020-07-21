@@ -177,7 +177,6 @@ namespace sts
 
 	private:
 		void hooked(const mqs::Message& message) {
-			printf("inside hooked\n");
 			auto& type = typeid(message);
 			auto iterator = node->messages.find(type);
 
