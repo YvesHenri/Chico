@@ -4,22 +4,18 @@
 
 struct Explosion : public mqs::ManagedMessage<Explosion>
 {
-	explicit Explosion(float magnitude, float ex, float ey) : ManagedMessage(1U), magnitude(magnitude), ex(ex), ey(ey) {
-		// Set values proportionally
-		duration = magnitude * 0.0215f;
+	explicit Explosion(float tons, float x, float y) : ManagedMessage(1U), tons(tons), x(x), y(y) {
+		radius = tons * 16.794f; // ~17 pixels per ton
+		duration = tons * 0.01185f;
 	}
 
-	float ex, ey; // Epicenter	
+	float x, y;
+	float tons;
+	float radius;
 	float duration;
-	float magnitude;
-
-	float impact() const {
-		return impact(ex, ey);
-	}
 
 	float impact(float tx, float ty) const {
-		float amplifier = 1.072f;
-		float distance = std::sqrtf((tx - ex) * (tx - ex) + (ty - ey) * (ty - ey));
-		return distance >= magnitude ? 0.f : (1.f - distance / magnitude) * magnitude * amplifier;
+		float distance = std::sqrtf((tx - x) * (tx - x) + (ty - y) * (ty - y));
+		return (radius - distance) * tons / radius; // Ranges from 0% to 100% explosion radius
 	}
 };

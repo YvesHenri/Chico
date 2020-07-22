@@ -1,7 +1,6 @@
 #pragma once
 
 #include <random>
-#include <queue>
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include "../Engine/Entities/System/System.hpp"
@@ -15,58 +14,56 @@ class CameraSystem final : public ecs::SystemListener<CameraChanged, Explosion>
 public:
 	explicit CameraSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window), random(-1.f, 1.f) {}
 
-	void draw(float dt) {}
+	void draw(float delta) {}
 
-	void update(float dt) {
+	void update(float delta) {
 		entities->each<Camera, Transform>([&](auto& entity, auto& camera, auto& transform) {
-			// Udate target location
-			tx = transform.x;
-			ty = transform.y;
-
-			// Lerp positions over time for smooth chasing
-			elapsedChaseTime = std::min(elapsedChaseTime + chaseSmoothness, 1.f); // "Clamp"
-			cx = (1.f - elapsedChaseTime) * cx + elapsedChaseTime * tx;
-			cy = (1.f - elapsedChaseTime) * cy + elapsedChaseTime * ty;
-
 			auto view = window->getView();
+			
+			// Lerp positions for smooth chasing
+			elapsedChaseTime = std::min(elapsedChaseTime + smoothChaseFactor, 1.f);
+			x = (1.f - elapsedChaseTime) * x + elapsedChaseTime * transform.x;
+			y = (1.f - elapsedChaseTime) * y + elapsedChaseTime * transform.y;
 
-			// Add shake if there's one
-			if (elapsedShakeTime < activeShakeDuration) {
-				elapsedShakeTime += dt;
+			// Offset positions when shaking
+			if (elapsedShakeTime < currentShakeDuration) {
+				auto decay = std::max((currentShakeDuration - (elapsedShakeTime + delta)) / currentShakeDuration, 0.f);
+				auto rotation = decay * random(randomEngine) * currentShakeStrenght * 0.35f; // 0.35 degrees per explosion ton
 
-				auto decay = std::max((activeShakeDuration - elapsedShakeTime) / activeShakeDuration, 0.f);
-				auto rotation = 5.f * decay * random(randomEngine); // TODO Find max rotation based on magnitude (current = 5 degrees)
-
-				INFO("Elap.: %.3f of %.3f, Decay: %f, Mag.: %f, Rot.: %.2f", elapsedShakeTime, activeShakeDuration, decay, activeShakeMagnitude, rotation);
+				TRACE("Elap.: %.3f of %.3f, Decay: %f, Mag.: %f, Rot.: %.2f", elapsedShakeTime, currentShakeDuration, decay, currentShakeStrenght, rotation);
 				
-				cx += decay * random(randomEngine) * activeShakeMagnitude;
-				cy += decay * random(randomEngine) * activeShakeMagnitude;
+				elapsedShakeTime += delta;
+				x += decay * random(randomEngine) * currentShakeStrenght;
+				y += decay * random(randomEngine) * currentShakeStrenght;
 
-				view.setRotation(rotation); // Will automatically reset when decay reaches 0
+				view.setRotation(rotation); // Resets automatically (when decay reaches 0)
 			}
 
 			// Apply
-			view.setCenter(cx, cy);
+			view.setCenter(x, y);
 			window->setView(view);
 		});
 	}
 
 	void handle(const Explosion& explosion) {
-		float magnitude = explosion.impact(cx, cy);
+		float impact = explosion.impact(x, y);
 
 		// Check whether the explosion causes any impact on where we are
-		if (magnitude > 0.f) {
-			ERR("Explosion! Mag: %.3f, Dur.: %.3f", magnitude, explosion.duration);
-			activeShakeMagnitude = magnitude; // Perhaps LERP previous + current?
-
-			// Merge shakes (TODO merge it better)
-			if (elapsedShakeTime < activeShakeDuration) {
-				activeShakeDuration += explosion.duration;
+		if (impact > 0.f) {
+			ERR("Explosion! Impact: %.3f, Duration: %.3f. Elapsed: %.3f, Total: %.3f", impact, explosion.duration, elapsedShakeTime, currentShakeDuration);
+			
+			// Merge explosions if there's one active
+			if (elapsedShakeTime < currentShakeDuration) {
+				currentShakeStrenght = ((currentShakeDuration - elapsedShakeTime) / currentShakeDuration * currentShakeStrenght) + impact;
+				currentShakeDuration += explosion.duration;
 			}
 			else {
-				activeShakeDuration = explosion.duration;
+				currentShakeStrenght = impact;
+				currentShakeDuration = explosion.duration;
 				elapsedShakeTime = 0.f;
 			}
+
+			ERR("Explosion! Final impact: %.3f, Final duration: %.3f", currentShakeStrenght, currentShakeDuration);
 		}
 	}
 
@@ -74,51 +71,13 @@ public:
 		elapsedChaseTime = 0.f;
 	}
 
-	/*
-	void handle(const ChangeCamera& message) {
-		std::vector<ecs::Entity::Id> ids;
-		
-		// Remember current position
-		auto cx = 0.f;
-		auto cy = 0.f;
-
-		elapsedChaseTime = 0.f;
-
-		// Copy entities with a camera (should result in a vector with 1 element)
-		entities->each<Camera>([&](auto& entity, auto& camera) {
-			ids.push_back(entity.id());
-			cx = camera.cx;
-			cy = camera.cy;
-		});
-
-		// Removes the camera from whoever have it
-		for (auto& id : ids) {
-			entities->remove<Camera>(id);
-		}
-
-		// Assign a brand new camera to the target
-		entities->assign<Camera>(message.target, cx, cy);
-	}
-	
-
-	void handle(const ZoomCamera& zoom) {
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal)) {
-			modifiers.emplace(zoom.factor);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash)) {
-			modifiers.emplace(zoom.factor);
-		}
-	}
-	*/
-
 private:
-	float cx = 0.f, cy = 0.f;
-	float tx = 0.f, ty = 0.f;
-	float activeShakeMagnitude = 0.f; // If any
-	float activeShakeDuration = 0.f; // If any
-	float elapsedShakeTime = 0.f;
+	float x = 0.f, y = 0.f;
+	float smoothChaseFactor = 0.0095f;
 	float elapsedChaseTime = 0.f;
-	float chaseSmoothness = 0.0095f;
+	float elapsedShakeTime = 0.f; // If any
+	float currentShakeStrenght = 0.f; // If any
+	float currentShakeDuration = 0.f; // If any
 	std::default_random_engine randomEngine;
 	std::uniform_real_distribution<float> random;
 	std::shared_ptr<sf::RenderWindow> window;

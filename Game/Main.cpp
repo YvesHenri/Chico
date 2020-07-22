@@ -51,12 +51,6 @@ float o2y = 250.f;
 float o3x = 700.f;
 float o3y = 500.f;
 
-sf::VertexArray perlim;
-
-void x() {
-
-}
-
 ENTRY_POINT
 {
 	// SFML startup
@@ -170,6 +164,13 @@ ENTRY_POINT
 					e.assign<Transform>(p.x, p.y);
 					break;
 				}
+				case sf::Mouse::Right:
+				{
+					auto v = window->getView().getViewport();
+					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+					messages->publish<Explosion>(10.f, p.x, p.y);
+					break;
+				}
 				}
 				break;
 			case sf::Event::KeyPressed:
@@ -206,10 +207,10 @@ ENTRY_POINT
 				case sf::Keyboard::Num4:
 					break;
 				case sf::Keyboard::Num8:
-					messages->publish<Explosion>(/*rand() % 50 + 100*/ 25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
+					messages->publish<Explosion>(25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
 					break;
 				case sf::Keyboard::Num9:
-					messages->publish<Explosion>(/*rand() % 50 + 100*/ 25.f, player.component<Transform>().x, player.component<Transform>().y);
+					messages->publish<Explosion>(25.f, player.component<Transform>().x, player.component<Transform>().y);
 					break;
 				case sf::Keyboard::Escape:
 					messages->publish<PauseGameMessage>();
