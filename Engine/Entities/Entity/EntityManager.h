@@ -3,10 +3,12 @@
 
 #include <memory>
 
-#include "Entity.h"
+#include "../Component/ComponentView.hpp"
 
 namespace ecs
 {
+	class Entity;
+
 	class EntityManager final
 	{
 	public:
@@ -26,43 +28,43 @@ namespace ecs
 		Entity create(const Component& component, const Components&... components);
 
 		template <typename Component, typename... Args>
-		Component assign(Entity::Id entityId, Args&&... componentArgs);
+		Component assign(unsigned entityId, Args&&... componentArgs);
 
 		template <typename Component, typename... Args>
-		Component replace(Entity::Id entityId, Args&&... componentArgs);
+		Component replace(unsigned entityId, Args&&... componentArgs);
 
 		template <typename Component, typename... Args>
-		Component save(Entity::Id entityId, Args&&... componentArgs);
+		Component save(unsigned entityId, Args&&... componentArgs);
 
 		template <typename Component>
-		Component& component(Entity::Id entityId);
+		Component& component(unsigned entityId);
 
 		template <typename Component, typename... Components>
-		void assign(Entity::Id entityId, const Component& component, const Components&... components);
+		void assign(unsigned entityId, const Component& component, const Components&... components);
 
 		template <typename Component, typename... Components>
-		void replace(Entity::Id entityId, const Component& component, const Components&... components);
+		void replace(unsigned entityId, const Component& component, const Components&... components);
 
 		template <typename Component, typename... Components>
-		void save(Entity::Id entityId, const Component& component, const Components&... components);
+		void save(unsigned entityId, const Component& component, const Components&... components);
 
 		template <typename Component, typename... Components>
-		void reset(Entity::Id entityId);
+		void reset(unsigned entityId);
 
 		template <typename Component, typename... Components>
-		void reset(Entity::Id entityId, const Component&, const Components&...);
+		void reset(unsigned entityId, const Component&, const Components&...);
 
 		template <typename Component, typename... Components>
 		void reset();
 
 		template <typename Component, typename... Components>
-		void remove(Entity::Id entityId);
+		void remove(unsigned entityId);
 
 		template <typename Component, typename... Components>
-		void remove(Entity::Id entityId, const Component&, const Components&...);
+		void remove(unsigned entityId, const Component&, const Components&...);
 
 		template <typename Component, typename... Components>
-		bool has(Entity::Id entityId);
+		bool has(unsigned entityId);
 
 		template <typename Component, typename... Components, typename Lambda>
 		void each(Lambda&& lambda);
@@ -75,13 +77,12 @@ namespace ecs
 
 		unsigned size() const;
 
-		Entity::Version version(Entity::Id entityId) const;
+		unsigned version(unsigned entityId) const;
+		unsigned current(unsigned entityId) const;
 
-		Entity::Version current(Entity::Id entityId) const;
+		bool valid(unsigned entityId) const;
 
-		bool valid(Entity::Id entityId) const;
-
-		void destroy(Entity::Id entityId);
+		void destroy(unsigned entityId);
 
 	private:
 		template <typename Component>
@@ -94,7 +95,7 @@ namespace ecs
 		bool managed() const;
 
 		template <bool = true>
-		bool has(Entity::Id entityId);
+		bool has(unsigned entityId);
 
 		template <bool = true>
 		bool empty() const;
@@ -103,18 +104,18 @@ namespace ecs
 		void reset();
 
 		template <bool = true>
-		void remove(Entity::Id entityId);
+		void remove(unsigned entityId);
 
 		template <bool = true>
-		void reset(Entity::Id entityId);
+		void reset(unsigned entityId);
 
-		void assign(Entity::Id entityId);
+		void assign(unsigned entityId);
 
-		void replace(Entity::Id entityId);
+		void replace(unsigned entityId);
 
-		void save(Entity::Id entityId);
+		void save(unsigned entityId);
 
-		void validate(Entity::Id entityId);
+		void validate(unsigned entityId);
 
 	private:
 		unsigned next = 0U;

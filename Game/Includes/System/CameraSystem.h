@@ -2,8 +2,8 @@
 
 #include <random>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <Engine/Entities/System/System.hpp>
 
-#include "../Engine/Entities/System/System.hpp"
 #include "../Message/Explosion.h"
 #include "../Message/CameraChanged.h"
 #include "../Component/Camera.h"

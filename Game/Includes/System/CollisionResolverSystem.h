@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Engine/Entities/System/System.hpp"
+#include <Engine/Entities/System/System.hpp>
 
 #include "../Message/Collision.h"
 #include "../Component/Transform.h"

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <Engine/Entities/System/System.hpp>
 
-#include "../Engine/Entities/System/System.hpp"
 #include "../Component/Transform.h"
 #include "../Component/Joystick.h"
 

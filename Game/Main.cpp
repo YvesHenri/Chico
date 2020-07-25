@@ -1,11 +1,11 @@
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 // Managers
-#include "../Engine/States/StateManager.hpp"
-#include "../Engine/Messages/MessageManager.hpp"
-#include "../Engine/Entities/Entity/Entity.hpp"
-#include "../Engine/Entities/Entity/EntityManager.hpp"
-#include "../Engine/Entities/System/SystemManager.hpp"
+#include <Engine/States/StateManager.hpp>
+#include <Engine/Messages/MessageManager.hpp>
+#include <Engine/Entities/Entity/Entity.hpp>
+#include <Engine/Entities/Entity/EntityManager.hpp>
+#include <Engine/Entities/System/SystemManager.hpp>
 
 // States
 #include "Includes/State/SplashState.h"

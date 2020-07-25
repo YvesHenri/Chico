@@ -2,16 +2,15 @@
 #define ECS_ENTITY_MANAGER_IMPL
 
 #include <cassert>
-#include <stdexcept>
 
+#include "EntityManager.h"
+#include "Entity.h"
 #include "../../Family.hpp"
-#include "../Entity/EntityManager.h"
-#include "../Component/ComponentView.hpp"
 
 namespace ecs
 {
-	Entity EntityManager::create() {
-		Entity::Id id = 0U;
+	inline Entity EntityManager::create() {
+		unsigned id = 0U;
 
 		if (available) {
 			auto entity = next;
@@ -32,21 +31,21 @@ namespace ecs
 	}
 
 	template <typename Component, typename... Args>
-	Entity EntityManager::create(Args&&... componentArgs) {
+	inline Entity EntityManager::create(Args&&... componentArgs) {
 		auto entity = create();
 		entity.assign<Component>(componentArgs...);
 		return entity;
 	}
 
 	template <typename Component, typename... Components>
-	Entity EntityManager::create(const Component& component, const Components&... components) {
+	inline Entity EntityManager::create(const Component& component, const Components&... components) {
 		auto entity = create();
 		entity.assign(component, components...);
 		return entity;
 	}
 
 	template <typename Component, typename... Args>
-	Component EntityManager::assign(Entity::Id entityId, Args&&... componentArgs) {
+	inline Component EntityManager::assign(unsigned entityId, Args&&... componentArgs) {
 		validate(entityId);
 		auto component = Component(std::forward<Args>(componentArgs)...);
 		safeCollection<Component>().add(entityId, component);
@@ -54,7 +53,7 @@ namespace ecs
 	}
 
 	template <typename Component, typename... Args>
-	Component EntityManager::replace(Entity::Id entityId, Args&&... componentArgs) {
+	inline Component EntityManager::replace(unsigned entityId, Args&&... componentArgs) {
 		validate(entityId);
 		auto component = Component(std::forward<Args>(componentArgs)...);
 		unsafeCollection<Component>().replace(entityId, component);
@@ -62,7 +61,7 @@ namespace ecs
 	}
 
 	template <typename Component, typename... Args>
-	Component EntityManager::save(Entity::Id entityId, Args&&... componentArgs) {
+	inline Component EntityManager::save(unsigned entityId, Args&&... componentArgs) {
 		validate(entityId);
 		auto component = Component(std::forward<Args>(componentArgs)...);
 		safeCollection<Component>().save(entityId, component);
@@ -70,34 +69,34 @@ namespace ecs
 	}
 
 	template <typename Component>
-	Component& EntityManager::component(Entity::Id entityId) {
+	inline Component& EntityManager::component(unsigned entityId) {
 		validate(entityId);
 		return unsafeCollection<Component>().get(entityId);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::assign(Entity::Id entityId, const Component& component, const Components&... components) {
+	inline void EntityManager::assign(unsigned entityId, const Component& component, const Components&... components) {
 		validate(entityId);
 		safeCollection<Component>().add(entityId, component);
 		assign(entityId, components...);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::replace(Entity::Id entityId, const Component& component, const Components&... components) {
+	inline void EntityManager::replace(unsigned entityId, const Component& component, const Components&... components) {
 		validate(entityId);
 		unsafeCollection<Component>().replace(entityId, component);
 		replace(entityId, components...);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::save(Entity::Id entityId, const Component& component, const Components&... components) {
+	inline void EntityManager::save(unsigned entityId, const Component& component, const Components&... components) {
 		validate(entityId);
 		safeCollection<Component>().save(entityId, component);
 		save(entityId, components...);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::reset(Entity::Id entityId) {
+	inline void EntityManager::reset(unsigned entityId) {
 		validate(entityId);
 
 		if (managed<Component>()) {
@@ -108,12 +107,12 @@ namespace ecs
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::reset(Entity::Id entityId, const Component&, const Components&...) {
+	inline void EntityManager::reset(unsigned entityId, const Component&, const Components&...) {
 		reset<Component, Components...>(entityId);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::reset() {
+	inline void EntityManager::reset() {
 		if (managed<Component>()) {
 			auto& collection = unsafeCollection<Component>();
 
@@ -126,31 +125,31 @@ namespace ecs
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::remove(Entity::Id entityId) {
+	inline void EntityManager::remove(unsigned entityId) {
 		validate(entityId);
 		unsafeCollection<Component>().remove(entityId);
 		remove<Components...>(entityId);
 	}
 
 	template <typename Component, typename... Components>
-	void EntityManager::remove(Entity::Id entityId, const Component&, const Components&...) {
+	inline void EntityManager::remove(unsigned entityId, const Component&, const Components&...) {
 		remove<Component, Components...>(entityId);
 	}
 
 	template <typename Component, typename... Components>
-	bool EntityManager::has(Entity::Id entityId) {
+	inline bool EntityManager::has(unsigned entityId) {
 		validate(entityId);
 		return managed<Component>() && unsafeCollection<Component>().contains(entityId) && has<Components...>(entityId);
 	}
 
 	template <typename Component, typename... Components, typename Lambda>
-	void EntityManager::each(Lambda&& lambda) {
+	inline void EntityManager::each(Lambda&& lambda) {
 		auto function = std::function<void(Entity&, Component&, Components&...)>(std::move(lambda));
 		ComponentView<Component, Components...>(this, safeCollection<Component>(), safeCollection<Components>()...).each(function);
 	}
 
 	template <typename Lambda>
-	void EntityManager::each(Lambda&& lambda) {
+	inline void EntityManager::each(Lambda&& lambda) {
 		auto function = std::function<void(Entity&)>(std::move(lambda));
 
 		if (available) {
@@ -173,30 +172,30 @@ namespace ecs
 	}
 
 	template <typename Component>
-	unsigned EntityManager::count() {
+	inline unsigned EntityManager::count() {
 		return managed<Component>() ? unsafeCollection<Component>().size() : 0U;
 	}
 
-	unsigned EntityManager::size() const {
+	inline unsigned EntityManager::size() const {
 		return entities.size() - available;
 	}
 
-	Entity::Version EntityManager::version(Entity::Id entityId) const {
-		return Entity::Version((entityId >> Entity::VERSION_SHIFT) & Entity::VERSION_MASK);
+	inline unsigned EntityManager::version(unsigned entityId) const {
+		return unsigned((entityId >> Entity::VERSION_SHIFT) & Entity::VERSION_MASK);
 	}
 
-	Entity::Version EntityManager::current(Entity::Id entityId) const {
+	inline unsigned EntityManager::current(unsigned entityId) const {
 		auto index = entityId & Entity::ID_MASK;
 		assert(index < entities.size());
-		return Entity::Version((entities[index] >> Entity::VERSION_SHIFT) & Entity::VERSION_MASK);
+		return unsigned((entities[index] >> Entity::VERSION_SHIFT) & Entity::VERSION_MASK);
 	}
 
-	bool EntityManager::valid(Entity::Id entityId) const {
+	inline bool EntityManager::valid(unsigned entityId) const {
 		auto index = entityId & Entity::ID_MASK;
 		return index < entities.size() && entities[index] == entityId;
 	}
 
-	void EntityManager::destroy(Entity::Id entityId) {
+	inline void EntityManager::destroy(unsigned entityId) {
 		validate(entityId);
 
 		auto entity = entityId & Entity::ID_MASK;
@@ -215,7 +214,7 @@ namespace ecs
 	}
 
 	template <typename Component>
-	ComponentCollection<Component>& EntityManager::safeCollection() {
+	inline ComponentCollection<Component>& EntityManager::safeCollection() {
 		auto uid = ComponentFamily::uid<Component>();
 
 		if (uid >= collections.size()) {
@@ -230,56 +229,56 @@ namespace ecs
 	}
 
 	template <typename Component>
-	ComponentCollection<Component>& EntityManager::unsafeCollection() {
+	inline ComponentCollection<Component>& EntityManager::unsafeCollection() {
 		auto& collection = collections[ComponentFamily::uid<Component>()];
 		return static_cast<ComponentCollection<Component>&>(*collection);
 	}
 
 	template <typename Component>
-	bool EntityManager::managed() const {
+	inline bool EntityManager::managed() const {
 		auto uid = ComponentFamily::uid<Component>();
 		return uid < collections.size() && collections[uid];
 	}
 
 	template <bool>
-	bool EntityManager::has(Entity::Id entityId) {
+	inline bool EntityManager::has(unsigned entityId) {
 		return true; // Fallback function for recursion
 	}
 
 	template <bool>
-	bool EntityManager::empty() const {
+	inline bool EntityManager::empty() const {
 		return false; // Fallback function for recursion
 	}
 
 	template <bool>
-	void EntityManager::reset() {
+	inline void EntityManager::reset() {
 		// Fallback blank function for recursion
 	}
 
 	template <bool>
-	void EntityManager::remove(Entity::Id entityId) {
+	inline void EntityManager::remove(unsigned entityId) {
 		// Fallback blank function for recursion
 	}
 
 	template <bool>
-	void EntityManager::reset(Entity::Id entityId) {
+	inline void EntityManager::reset(unsigned entityId) {
 		// Fallback blank function for recursion
 	}
 
-	void EntityManager::assign(Entity::Id entityId) {
+	inline void EntityManager::assign(unsigned entityId) {
 		// Fallback blank function for recursion
 	}
 
-	void EntityManager::replace(Entity::Id entityId) {
+	inline void EntityManager::replace(unsigned entityId) {
 		// Fallback blank function for recursion
 	}
 
-	void EntityManager::save(Entity::Id entityId) {
+	inline void EntityManager::save(unsigned entityId) {
 		// Fallback blank function for recursion
 	}
 
-	void EntityManager::validate(Entity::Id entityId) {
-		if (!valid(entityId)) throw new std::runtime_error("Invalid entity identifier");
+	inline void EntityManager::validate(unsigned entityId) {
+		if (!valid(entityId)) throw "Invalid entity identifier";
 	}
 }
 

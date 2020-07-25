@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Engine/Messages/Message.hpp"
+#include <Engine/Messages/Message.hpp>
 
 struct PauseGameMessage final : public mqs::ManagedMessage<PauseGameMessage>
 {

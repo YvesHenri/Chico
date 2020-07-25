@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Engine/Messages/Message.hpp"
+#include <Engine/Messages/Message.hpp>
 
 struct LoadStartMessage final : public mqs::ManagedMessage<LoadStartMessage>
 {

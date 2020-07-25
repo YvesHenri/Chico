@@ -6,7 +6,7 @@
 #include <SFML\Graphics\RenderStates.hpp>
 
 #include "../Log.h"
-#include "../Engine/States/State.hpp"
+#include <Engine/States/State.hpp>
 
 class State : public sts::State, public sf::Drawable
 {

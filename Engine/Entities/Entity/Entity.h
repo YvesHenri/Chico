@@ -1,8 +1,6 @@
 #ifndef ECS_ENTITY_DEF
 #define ECS_ENTITY_DEF
 
-#include "../Component/ComponentCollection.hpp"
-
 namespace ecs
 {
 	class EntityManager;
@@ -10,20 +8,16 @@ namespace ecs
 	class Entity final
 	{
 	public:
-		using Id = unsigned;
-		using Version = unsigned;
-
 		static const int ID_MASK = 0xFFFFFF;
 		static const int VERSION_MASK = 0xFF;
 		static const int VERSION_SHIFT = 24;
 
 		Entity() = delete;
 		Entity(const Entity&) = default;
-		Entity(Id id, EntityManager* manager);
+		Entity(unsigned id, EntityManager* manager);
 
-		Id id() const;
-
-		Version version() const;
+		unsigned id() const;
+		unsigned version() const;
 
 		template <typename Component>
 		Component& component() const;
@@ -65,19 +59,15 @@ namespace ecs
 		bool has(const Component* unused, const Components*... unuseds) const;
 
 		void destroy();
-
 		bool valid() const;
 
 		bool operator==(const Entity& other) const;
-
 		bool operator!=(const Entity& other) const;
-
-		bool operator<(const Entity& other) const;
 
 		operator bool() const;
 
 	private:
-		Id identifier;
+		unsigned identifier;
 		EntityManager* manager;
 	};
 }

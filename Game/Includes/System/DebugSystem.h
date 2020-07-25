@@ -4,8 +4,8 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
+#include <Engine/Entities/System/System.hpp>
 
-#include "../Engine/Entities/System/System.hpp"
 #include "../Component/Transform.h"
 #include "../Component/Motion.h"
 

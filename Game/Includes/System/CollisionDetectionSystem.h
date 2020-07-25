@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cmath>
-
-#include "../Engine/Entities/System/System.hpp"
+#include <Engine/Entities/System/System.hpp>
 
 #include "../Component/Transform.h"
 #include "../Component/Motion.h"

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
-
-#include "../Engine/Entities/System/System.hpp"
+#include <Engine/Entities/System/System.hpp>
 
 #include "../Component/Body.h"
 #include "../Component/Render.h"
