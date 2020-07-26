@@ -149,8 +149,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="Entities\Component\Message\ComponentAdded.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollection.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollectionIntersection.hpp" />
+    <ClInclude Include="Entities\Component\Message\ComponentRemoved.hpp" />
     <ClInclude Include="Entities\Component\ComponentView.hpp" />
     <ClInclude Include="Entities\Entity\Entity.h" />
     <ClInclude Include="Entities\Entity\Entity.hpp" />

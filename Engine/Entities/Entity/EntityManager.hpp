@@ -9,6 +9,11 @@
 
 namespace ecs
 {
+	inline EntityManager::EntityManager(const std::shared_ptr<mqs::MessageManager>& messages) : messages(messages) {
+		next = 0U;
+		available = 0U;
+	}
+
 	inline Entity EntityManager::create() {
 		unsigned id = 0U;
 
@@ -222,7 +227,7 @@ namespace ecs
 		}
 
 		if (!collections[uid]) {
-			collections[uid] = std::make_unique<ComponentCollection<Component>>();
+			collections[uid] = std::make_unique<ComponentCollection<Component>>(messages);
 		}
 
 		return unsafeCollection<Component>();

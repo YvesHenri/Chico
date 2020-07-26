@@ -30,6 +30,8 @@
 #include "Includes/System/CollisionResolverSystem.h"
 #include "Includes/System/CollisionDetectionSystem.h"
 #include "Includes/System/CameraSystem.h"
+#include "Includes/System/BackgroundSystem.h"
+#include "Includes/System/WeatherSystem.h"
 
 #include "Includes/Resource/ResourceStore.hpp"
 
@@ -42,15 +44,6 @@
 #define ENTRY_POINT int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif
 
-float vx = 400.f;
-float vy = 300.f;
-float o1x = 50.f;
-float o1y = 100.f;
-float o2x = 500.f;
-float o2y = 250.f;
-float o3x = 700.f;
-float o3y = 500.f;
-
 ENTRY_POINT
 {
 	// SFML startup
@@ -60,7 +53,7 @@ ENTRY_POINT
 
 	// Managers startup
 	auto messages = std::make_shared<mqs::MessageManager>();
-	auto entities = std::make_shared<ecs::EntityManager>();
+	auto entities = std::make_shared<ecs::EntityManager>(messages);
 	auto systems = std::make_shared<ecs::SystemManager>(entities, messages);
 	auto states = std::make_shared<sts::StateManager>(messages); // (systems, messages)
 
@@ -85,22 +78,28 @@ ENTRY_POINT
 
 	// State transition setup
 	states->
+		map<PlayingState>(systems).done();
+	/*
 		 map<SplashState>().onDone().go<MenuState>()
 		.map<MenuState>()
 			.onDone().go<LoadingState>()
 			.onMessage<StartGameMessage>().go<LoadingState>()
 		.map<LoadingState>().onDone().go<PlayingState>()
-		.map<PlayingState>()
+		.map<PlayingState>(systems)
 			.onMessage<LoadStartMessage>().go<LoadingState>()
 			.onMessage<PauseGameMessage>().go<PausedState>()
 		.map<PausedState>().onMessage<PauseGameMessage>().go<PlayingState>()
 		.done();
+		*/
 
+	// System registration
+	systems->add<WeatherSystem>();
 	systems->add<JoystickSystem>(window);
 	systems->add<KinematicSystem>();
 	systems->add<CollisionDetectionSystem>();
 	systems->add<CollisionResolverSystem>();
 	systems->add<CameraSystem>(window);
+	systems->add<BackgroundSystem>();
 	systems->add<RenderSystem>(window);
 	systems->add<DebugSystem>(window);
 
@@ -125,18 +124,6 @@ ENTRY_POINT
 	enemy.assign<Motion>();
 	enemy.assign<Transform>(600.f, 300.f);
 	enemy.assign<Render>(sf::Color::Yellow);
-
-	sf::Sprite o1;
-	o1.setTexture(TextureStore::get("1.png"));
-	o1.setPosition(o1x, o1y);
-
-	sf::Sprite o2;
-	o2.setTexture(TextureStore::get("2.png"));
-	o2.setPosition(o2x, o2y);
-
-	sf::Sprite o3;
-	o3.setTexture(TextureStore::get("3.png"));
-	o3.setPosition(o3x, o3y);
 
 	while (window->isOpen())
 	{
@@ -195,12 +182,10 @@ ENTRY_POINT
 				case sf::Keyboard::Num1:
 					player.assign<Camera>();
 					enemy.remove<Camera>();
-					messages->publish<CameraChanged>();
 					break;
 				case sf::Keyboard::Num2:
 					player.remove<Camera>();
 					enemy.assign<Camera>();
-					messages->publish<CameraChanged>();
 					break;
 				case sf::Keyboard::Num3:
 					break;
@@ -233,12 +218,8 @@ ENTRY_POINT
 
 		float delta = clock.restart().asSeconds();
 
-		window->clear(sf::Color(128, 128, 128));		
-		systems->update(delta);
+		window->clear(sf::Color(128, 128, 128));
 		states->update(delta);
-		window->draw(o1);
-		window->draw(o2);
-		window->draw(o3);	
 		window->display();
 	}
 

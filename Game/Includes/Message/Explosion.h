@@ -6,7 +6,7 @@ struct Explosion : public mqs::ManagedMessage<Explosion>
 {
 	explicit Explosion(float tons, float x, float y) : ManagedMessage(1U), tons(tons), x(x), y(y) {
 		radius = tons * 16.794f; // ~17 pixels per ton
-		duration = tons * 0.01185f;
+		duration = tons * 0.01785f;
 	}
 
 	float x, y;

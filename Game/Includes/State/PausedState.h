@@ -7,15 +7,14 @@
 class PausedState final : public State
 {
 public:
-	PausedState();
 
-	sts::StateResult update(float dt) override;
+	PausedState();
 
 	void onEnter() override;
 	void onLeave() override;
-	void onEvent(const sf::Event& event) override;
-
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+	sts::StateResult update(float dt) override;
 
 private:
 	sf::RectangleShape overlap;

@@ -10,11 +10,6 @@ void PlayingState::onLeave()
 	ERR("<----- Playing");
 }
 
-void PlayingState::onEvent(const sf::Event& event)
-{
-
-}
-
 void PlayingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 
@@ -22,6 +17,6 @@ void PlayingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 sts::StateResult PlayingState::update(float dt)
 {
-	//systems->update(dt);
+	systems->update(dt);
 	return sts::StateResult::Running;
 }

@@ -3,6 +3,10 @@
 
 #include <vector>
 
+#include "../../Messages/MessageManager.hpp"
+#include "../../Entities/Component/Message/ComponentAdded.hpp"
+#include "../../Entities/Component/Message/ComponentRemoved.hpp"
+
 namespace ecs
 {
 	/**
@@ -105,12 +109,12 @@ namespace ecs
 	class ComponentCollection final : public Collection
 	{
 	public:
-		ComponentCollection() = default;
 		ComponentCollection(const ComponentCollection&) = delete;
 		ComponentCollection(ComponentCollection&&) = default;
+		explicit ComponentCollection(const std::shared_ptr<mqs::MessageManager>& messages) : messages(messages) {}
 
 		void clear() override {
-			components.clear();
+			components.clear(); // Iterate and send message
 			Collection::clear();
 		}
 
@@ -122,19 +126,39 @@ namespace ecs
 			auto removed = Collection::remove(item);
 
 			if (removed) {
-				components[indices[item] & ~OCCUPIED] = std::move(components.back());
-				components.pop_back();
+				auto index = indices[item] & ~OCCUPIED;
+				auto component = components[index];
+				components[index] = std::move(components.back()); // Shrink
+				components.pop_back(); // Shrink
+				messages->publish<ComponentRemoved<Component>>(component, item);
 			}
 
 			return removed;
 		}
 
 		bool add(Collection::Item item, const Component& component) {
-			return Collection::add(item) ? components.emplace_back(component), true : false; // Execute and return
+			auto added = Collection::add(item);
+
+			if (added) {
+				components.emplace_back(component);
+				messages->publish<ComponentAdded<Component>>(component, item);
+			}
+
+			return added;
 		}
 
-		bool replace(Collection::Item item, const Component& component) {
-			return contains(item) ? components[indices[item] & ~OCCUPIED] = component, true : false; // Execute and return
+		bool replace(Collection::Item item, const Component& newComponent) {
+			auto exists = contains(item);
+
+			if (exists) {
+				auto index = indices[item] & ~OCCUPIED;
+				auto oldComponent = components[index];
+				messages->publish<ComponentRemoved<Component>>(oldComponent, item);
+				components[index] = newComponent;
+				messages->publish<ComponentAdded<Component>>(newComponent, item);
+			}
+
+			return exists;
 		}
 
 		bool save(Collection::Item item, const Component& component) {
@@ -147,6 +171,7 @@ namespace ecs
 
 	private:
 		std::vector<Component> components;
+		std::shared_ptr<mqs::MessageManager> messages;
 	};
 }
 

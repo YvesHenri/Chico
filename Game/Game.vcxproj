@@ -130,7 +130,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Libraries</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;SFML\freetype.lib;SFML\ogg.lib;SFML\jpeg.lib;SFML\flac.lib;SFML\openal32.lib;SFML\vorbis.lib;SFML\vorbisenc.lib;SFML\vorbisfile.lib;SFML\sfml-main.lib;SFML\sfml-graphics-s.lib;SFML\sfml-window-s.lib;SFML\sfml-system-s.lib;SFML\sfml-audio-s.lib;SFML\sfml-network-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;SFML\freetype.lib;SFML\ogg.lib;SFML\flac.lib;SFML\openal32.lib;SFML\vorbis.lib;SFML\vorbisenc.lib;SFML\vorbisfile.lib;SFML\sfml-main.lib;SFML\sfml-graphics-s.lib;SFML\sfml-window-s.lib;SFML\sfml-system-s.lib;SFML\sfml-audio-s.lib;SFML\sfml-network-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -165,7 +165,6 @@
     <ClInclude Include="Includes\Component\Render.h" />
     <ClInclude Include="Includes\Component\Transform.h" />
     <ClInclude Include="Includes\Component\Motion.h" />
-    <ClInclude Include="Includes\Message\CameraChanged.h" />
     <ClInclude Include="Includes\Message\Collision.h" />
     <ClInclude Include="Includes\Message\Explosion.h" />
     <ClInclude Include="Includes\Message\LoadCompleteMessage.h" />
@@ -181,6 +180,7 @@
     <ClInclude Include="Includes\State\SplashState.h" />
     <ClInclude Include="Includes\State\State.h" />
     <ClInclude Include="Includes\Log.h" />
+    <ClInclude Include="Includes\System\BackgroundSystem.h" />
     <ClInclude Include="Includes\System\CameraSystem.h" />
     <ClInclude Include="Includes\System\CollisionDetectionSystem.h" />
     <ClInclude Include="Includes\System\CollisionResolverSystem.h" />
@@ -188,6 +188,7 @@
     <ClInclude Include="Includes\System\JoystickSystem.h" />
     <ClInclude Include="Includes\System\KinematicSystem.h" />
     <ClInclude Include="Includes\System\RenderSystem.h" />
+    <ClInclude Include="Includes\System\WeatherSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

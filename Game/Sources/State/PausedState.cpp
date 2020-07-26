@@ -16,11 +16,6 @@ void PausedState::onLeave()
 	WARN("<----- Paused");
 }
 
-void PausedState::onEvent(const sf::Event& event)
-{
-
-}
-
 void PausedState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	/*

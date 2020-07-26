@@ -15,15 +15,15 @@ public:
 	explicit DebugSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
 		text.setFont(FontStore::get("Carlito.ttf"));
 		text.setCharacterSize(16U);
-		text.setColor(sf::Color::Black);
-		x[0].color = sf::Color::Black;
-		x[1].color = sf::Color::Black;
-		x[0].position = sf::Vector2f(0.f, 300.f);
-		x[1].position = sf::Vector2f(800.f, 300.f);
-		y[0].color = sf::Color::Black;
-		y[1].color = sf::Color::Black;
-		y[0].position = sf::Vector2f(400.f, 0.f);
-		y[1].position = sf::Vector2f(400.f, 600.f);
+		text.setFillColor(sf::Color::Black);
+		xaxis[0].color = sf::Color::Black;
+		xaxis[1].color = sf::Color::Black;
+		xaxis[0].position = sf::Vector2f(0.f, 300.f);
+		xaxis[1].position = sf::Vector2f(800.f, 300.f);
+		yaxis[0].color = sf::Color::Black;
+		yaxis[1].color = sf::Color::Black;
+		yaxis[0].position = sf::Vector2f(400.f, 0.f);
+		yaxis[1].position = sf::Vector2f(400.f, 600.f);
 	}
 
 	void draw(float dt) override {}
@@ -54,8 +54,8 @@ public:
 			}
 
 			// Cartesian plane
-			window->draw(x, 2, sf::PrimitiveType::Lines);
-			window->draw(y, 2, sf::PrimitiveType::Lines);
+			window->draw(xaxis, 2, sf::PrimitiveType::Lines);
+			window->draw(yaxis, 2, sf::PrimitiveType::Lines);
 
 			window->setView(current);
 		});
@@ -63,7 +63,7 @@ public:
 
 private:
 	sf::Text text;
-	sf::Vertex x[2];
-	sf::Vertex y[2];
+	sf::Vertex xaxis[2];
+	sf::Vertex yaxis[2];
 	std::shared_ptr<sf::RenderWindow> window;
 };

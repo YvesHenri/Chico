@@ -3,13 +3,13 @@
 #include <random>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <Engine/Entities/System/System.hpp>
+#include <Engine/Entities/Component/Message/ComponentAdded.hpp>
 
 #include "../Message/Explosion.h"
-#include "../Message/CameraChanged.h"
 #include "../Component/Camera.h"
 #include "../Component/Transform.h"
 
-class CameraSystem final : public ecs::SystemListener<CameraChanged, Explosion>
+class CameraSystem final : public ecs::SystemListener<Explosion, ComponentAdded<Camera>>
 {
 public:
 	explicit CameraSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window), random(-1.f, 1.f) {}
@@ -67,7 +67,7 @@ public:
 		}
 	}
 
-	void handle(const CameraChanged& message) {
+	void handle(const ComponentAdded<Camera>& component) {
 		elapsedChaseTime = 0.f;
 	}
 

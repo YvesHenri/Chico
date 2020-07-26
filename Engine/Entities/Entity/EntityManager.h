@@ -12,7 +12,7 @@ namespace ecs
 	class EntityManager final
 	{
 	public:
-		EntityManager() = default;
+		EntityManager(const std::shared_ptr<mqs::MessageManager>& messages);
 		EntityManager(const EntityManager&) = delete;
 		EntityManager(EntityManager&&) = default;
 
@@ -122,6 +122,7 @@ namespace ecs
 		unsigned available = 0U;
 		std::vector<unsigned> entities;
 		std::vector<std::unique_ptr<Collection>> collections;
+		std::shared_ptr<mqs::MessageManager> messages;
 	};
 }
 

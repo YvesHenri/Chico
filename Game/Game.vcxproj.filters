@@ -122,7 +122,10 @@
     <ClInclude Include="Includes\Message\Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\Message\CameraChanged.h">
+    <ClInclude Include="Includes\System\BackgroundSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\System\WeatherSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

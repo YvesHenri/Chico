@@ -10,11 +10,6 @@ void LoadingState::onLeave()
 	TRACE("<----- Loading");
 }
 
-void LoadingState::onEvent(const sf::Event& event)
-{
-
-}
-
 void LoadingState::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 

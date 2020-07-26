@@ -15,7 +15,7 @@ public:
 	explicit RenderSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
 		text.setFont(FontStore::get("Carlito.ttf"));
 		text.setCharacterSize(28U);
-		text.setColor(sf::Color::Black);
+		text.setFillColor(sf::Color::Black);
 	}
 
 	void draw(float delta) override {
