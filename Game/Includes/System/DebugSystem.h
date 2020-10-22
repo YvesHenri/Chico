@@ -15,7 +15,7 @@ public:
 	explicit DebugSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
 		text.setFont(FontStore::get("Carlito.ttf"));
 		text.setCharacterSize(16U);
-		text.setFillColor(sf::Color::Black);
+		text.setFillColor(sf::Color::Blue);
 		xaxis[0].color = sf::Color::Black;
 		xaxis[1].color = sf::Color::Black;
 		xaxis[0].position = sf::Vector2f(0.f, 300.f);
@@ -26,8 +26,6 @@ public:
 		yaxis[1].position = sf::Vector2f(400.f, 600.f);
 	}
 
-	void draw(float dt) override {}
-
 	void update(float dt) override {
 		entities->each<Motion, Transform>([&](auto& entity, auto& motion, auto& transform) {
 			auto fixed = window->getDefaultView();
@@ -36,26 +34,31 @@ public:
 			// FPS
 			text.setPosition(5.f, 5.f);
 			text.setString("FPS: " + std::to_string(1.f / dt));
+
 			window->setView(fixed);
 			window->draw(text);
 			
-			// Player velocity
-			if (entity.id() == 0U) {
-				text.setString("Vx, Vy = " + std::to_string(motion.ax) + ", " + std::to_string(motion.ay));
+			// Player
+			if (entity.has<Joystick>()) {
+				// Velocity
+				text.setString("Velocity = " + std::to_string(motion.velocity.x) + ", " + std::to_string(motion.velocity.y) + " = " + std::to_string(motion.velocity.magnitude()));
 				text.setPosition(5.f, 24.f);
 				window->draw(text);
-			}			
 
-			// Player position
-			if (entity.id() == 0U) {
-				text.setString("X, Y = " + std::to_string(transform.x) + ", " + std::to_string(transform.y));
-				text.setPosition(5.f, 44.f);
+				// Acceleration
+				//text.setString("Acceleration = " + std::to_string(motion.acceleration.x) + ", " + std::to_string(motion.acceleration.y));
+				//text.setPosition(5.f, 44.f);
+				//window->draw(text);
+
+				// Player position
+				text.setString("Player = " + std::to_string(transform.x) + ", " + std::to_string(transform.y));
+				text.setPosition(5.f, 64.f);
 				window->draw(text);
 			}
 
 			// Cartesian plane
-			window->draw(xaxis, 2, sf::PrimitiveType::Lines);
-			window->draw(yaxis, 2, sf::PrimitiveType::Lines);
+			//window->draw(xaxis, 2, sf::PrimitiveType::Lines);
+			//window->draw(yaxis, 2, sf::PrimitiveType::Lines);
 
 			window->setView(current);
 		});

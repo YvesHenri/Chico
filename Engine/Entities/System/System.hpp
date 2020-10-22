@@ -9,7 +9,6 @@ namespace ecs
 	class System
 	{
 	public:
-		virtual void draw(float delta) = 0;
 		virtual void update(float delta) = 0;
 		virtual void configure(const std::shared_ptr<ecs::EntityManager>& entities, const std::shared_ptr<mqs::MessageManager>& messages) {
 			this->messages = messages;

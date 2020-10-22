@@ -10,8 +10,6 @@
 class CollisionResolverSystem final : public ecs::SystemListener<Collision>
 {
 public:
-	void draw(float dt) override {}
-
 	void update(float dt) override {}
 
 	void handle(const Collision& message) {
@@ -22,33 +20,33 @@ public:
 		float nx = (message.t2.x - message.t1.x) / dist;
 		float ny = (message.t2.y - message.t1.y) / dist;
 
-		// Tangent
+		// Tangent (cross?)
 		float tx = -ny;
 		float ty = nx;
 
 		// Dot Product Tangent
-		float dpt1 = message.m1.vx * tx + message.m1.vy * ty;
-		float dpt2 = message.m2.vx * tx + message.m2.vy * ty;
+		float dpt1 = message.m1.velocity.x * tx + message.m1.velocity.y * ty;
+		float dpt2 = message.m2.velocity.x * tx + message.m2.velocity.y * ty;
 
 		// Dot Product Normal
-		float dpn1 = message.m1.vx * nx + message.m1.vy * ny;
-		float dpn2 = message.m2.vx * nx + message.m2.vy * ny;
+		float dpn1 = message.m1.velocity.x * nx + message.m1.velocity.y * ny;
+		float dpn2 = message.m2.velocity.x * nx + message.m2.velocity.y * ny;
 
 		// Conservation of momentum in 1D
-		float m1 = (dpn1 * (message.b1.weight - message.b2.weight) + 2.0f * message.b2.weight * dpn2) / (message.b1.weight + message.b2.weight);
-		float m2 = (dpn2 * (message.b2.weight - message.b1.weight) + 2.0f * message.b1.weight * dpn1) / (message.b1.weight + message.b2.weight);
+		float m1 = (dpn1 * (message.b1.mass - message.b2.mass) + 2.0f * message.b2.mass * dpn2) / (message.b1.mass + message.b2.mass);
+		float m2 = (dpn2 * (message.b2.mass - message.b1.mass) + 2.0f * message.b1.mass * dpn1) / (message.b1.mass + message.b2.mass);
 
 		// Update ball velocities
-		message.m1.vx = tx * dpt1 + nx * m1;
-		message.m1.vy = ty * dpt1 + ny * m1;
-		message.m2.vx = tx * dpt2 + nx * m2;
-		message.m2.vy = ty * dpt2 + ny * m2;
+		message.m1.velocity.x = tx * dpt1 + nx * m1;
+		message.m1.velocity.y = ty * dpt1 + ny * m1;
+		message.m2.velocity.x = tx * dpt2 + nx * m2;
+		message.m2.velocity.y = ty * dpt2 + ny * m2;
 
 		// Update rotations
-		message.t1.rotation = std::atan2f(message.m1.vy, message.m1.vx) * 57.2958f;
-		message.t2.rotation = std::atan2f(message.m2.vy, message.m2.vx) * 57.2958f;
+		//message.t1.rotation = std::atan2f(message.m1.velocity.y, message.m1.velocity.x) * 57.2958f;
+		//message.t2.rotation = std::atan2f(message.m2.velocity.y, message.m2.velocity.x) * 57.2958f;
 
-		messages->publish<Explosion>(20.f, message.t1.x, message.t1.y);
+		//messages->publish<Explosion>(20.f, message.t1.x, message.t1.y);
 	}
 
 private:

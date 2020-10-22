@@ -2,8 +2,10 @@
 
 struct Transform
 {
-	explicit Transform(float x, float y, float rotation = 0.f) : x(x), y(y), rotation(rotation) {}
+	explicit Transform(float x, float y, float rotation = 0.f) : x(x), y(y), z(0.f) {}
 
 	float x, y, z = 0.f;
-	float rotation = 0.f; // Degrees
+
+	float dx, dy; // Destination (target)
+	float tx, ty; // Tile coordinates
 };

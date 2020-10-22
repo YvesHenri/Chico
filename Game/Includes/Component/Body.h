@@ -2,12 +2,14 @@
 
 struct Body
 {
-	explicit Body(float weight) : weight(weight), radius(weight * 0.7f) {}
+	explicit Body(float mass) : Body(mass, mass * 32.f) {}
+	explicit Body(float mass, float size) : mass(mass), maxMass(mass), radius(size / 2.f) {}
 
-	float weight;
+	float mass; // Current value
+	float maxMass;
 	float radius;
 
-	bool flyable = true;
+	bool flyable = false;
 	bool pushable = false;
 	bool collidable = true;
 };

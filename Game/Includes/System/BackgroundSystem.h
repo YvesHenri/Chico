@@ -7,10 +7,6 @@
 class BackgroundSystem final : public ecs::System
 {
 public:
-	void draw(float delta) override {
-
-	}
-
 	void update(float delta) override {
 
 	}

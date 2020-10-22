@@ -1,4 +1,6 @@
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 // Managers
 #include <Engine/States/StateManager.hpp>
@@ -18,9 +20,9 @@
 #include "Includes/Message/Explosion.h"
 #include "Includes/Message/StartGameMessage.h"
 #include "Includes/Message/PauseGameMessage.h"
-#include "Includes/Message/LoadStartMessage.h"
-#include "Includes/Message/LoadProgressMessage.h"
-#include "Includes/Message/LoadCompleteMessage.h"
+#include "Includes/Message/LoadMessage.h"
+#include "Includes/Message/LoadingMessage.h"
+#include "Includes/Message/LoadedMessage.h"
 
 // Systems
 #include "Includes/System/KinematicSystem.h"
@@ -40,7 +42,6 @@
 #define ENTRY_POINT int main()
 #else
 #pragma comment(linker, "/SUBSYSTEM:windows")
-//#define ENTRY_POINT int __stdcall WinMain(void*, void*, char*, int)
 #define ENTRY_POINT int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif
 
@@ -73,7 +74,7 @@ ENTRY_POINT
 
 	// Message hooking for debugging purposes
 	messages->hook([](const mqs::Message& message) {
-		//TRACE("Hooked message: id = %d, uid = %d, family = %d", message.id, message.uid(), message.family);
+		DEBUG("Hooked message: id = %d, uid = %d, family = %d", message.id, message.uid(), message.family);
 	});
 
 	// State transition setup
@@ -94,8 +95,8 @@ ENTRY_POINT
 
 	// System registration
 	systems->add<WeatherSystem>();
-	systems->add<JoystickSystem>(window);
-	systems->add<KinematicSystem>();
+	systems->add<JoystickSystem>();
+	systems->add<KinematicSystem>(window);
 	systems->add<CollisionDetectionSystem>();
 	systems->add<CollisionResolverSystem>();
 	systems->add<CameraSystem>(window);
@@ -110,20 +111,25 @@ ENTRY_POINT
 	window->setFramerateLimit(60);
 
 	auto player = entities->create();
-
-	player.assign<Body>(30.f);
-	player.assign<Motion>();
+	player.assign<Body>(1.f);
+	player.assign<Motion>();	
+	player.assign<Transform>(400.f, 300.f);
+	player.assign<Render>(sf::Color::Red);
 	player.assign<Joystick>();
 	player.assign<Camera>();
-	player.assign<Transform>(200.f, 300.f);
-	player.assign<Render>(sf::Color::Red);
 
 	auto enemy = entities->create();
-
-	enemy.assign<Body>(rand() % 10 + 30);
+	enemy.assign<Body>(2.5f);
 	enemy.assign<Motion>();
-	enemy.assign<Transform>(600.f, 300.f);
-	enemy.assign<Render>(sf::Color::Yellow);
+	enemy.assign<Transform>(500.f, 100.f);
+	enemy.assign<Render>(sf::Color::Yellow);	
+
+	TextureStore::get("grid.png").setRepeated(true);
+
+	sf::Sprite background;
+	background.setTexture(TextureStore::get("grid.png"));
+	background.setTextureRect(sf::IntRect(0, 0, 5000, 5000));
+	background.setPosition(-2500.f, -2500.f);
 
 	while (window->isOpen())
 	{
@@ -143,9 +149,9 @@ ENTRY_POINT
 				case sf::Mouse::Left:
 				{
 					auto e = entities->create();
-					auto v = window->getView().getViewport();
+					auto v = window->getView().getCenter();
 					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-					e.assign<Body>(rand() % 50 + 30);
+					e.assign<Body>(rand() % 2 + 1);
 					e.assign<Motion>();
 					e.assign<Render>(sf::Color(rand() % 255, rand() % 255, rand() % 255));
 					e.assign<Transform>(p.x, p.y);
@@ -153,9 +159,8 @@ ENTRY_POINT
 				}
 				case sf::Mouse::Right:
 				{
-					auto v = window->getView().getViewport();
 					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-					messages->publish<Explosion>(10.f, p.x, p.y);
+					messages->publish<Explosion>(rand() % 20 + 10, p.x, p.y);
 					break;
 				}
 				}
@@ -164,38 +169,28 @@ ENTRY_POINT
 				switch (event.key.code)
 				{
 				case sf::Keyboard::Return:
-				{
-					messages->publish<StartGameMessage>();
-
-					// Toggle controller type
-					switch (player.component<Joystick>().type)
-					{
-					case Joystick::Type::Mouse:
-						player.component<Joystick>().type = Joystick::Type::Keyboard;
-						break;
-					case Joystick::Type::Keyboard:
-						player.component<Joystick>().type = Joystick::Type::Mouse;
-						break;
-					}
 					break;
-				}
 				case sf::Keyboard::Num1:
 					player.assign<Camera>();
 					enemy.remove<Camera>();
+					player.assign<Joystick>();
+					enemy.remove<Joystick>();
 					break;
 				case sf::Keyboard::Num2:
 					player.remove<Camera>();
 					enemy.assign<Camera>();
+					player.remove<Joystick>();
+					enemy.assign<Joystick>();
 					break;
 				case sf::Keyboard::Num3:
 					break;
 				case sf::Keyboard::Num4:
 					break;
 				case sf::Keyboard::Num8:
-					messages->publish<Explosion>(25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
+					//messages->publish<Explosion>(25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
 					break;
 				case sf::Keyboard::Num9:
-					messages->publish<Explosion>(25.f, player.component<Transform>().x, player.component<Transform>().y);
+					//messages->publish<Explosion>(25.f, player.component<Transform>().x, player.component<Transform>().y);
 					break;
 				case sf::Keyboard::Escape:
 					messages->publish<PauseGameMessage>();
@@ -219,6 +214,7 @@ ENTRY_POINT
 		float delta = clock.restart().asSeconds();
 
 		window->clear(sf::Color(128, 128, 128));
+		window->draw(background);
 		states->update(delta);
 		window->display();
 	}

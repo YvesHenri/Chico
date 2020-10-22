@@ -14,8 +14,6 @@ class CameraSystem final : public ecs::SystemListener<Explosion, ComponentAdded<
 public:
 	explicit CameraSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window), random(-1.f, 1.f) {}
 
-	void draw(float delta) {}
-
 	void update(float delta) {
 		entities->each<Camera, Transform>([&](auto& entity, auto& camera, auto& transform) {
 			auto view = window->getView();
@@ -30,7 +28,7 @@ public:
 				auto decay = std::max((currentShakeDuration - (elapsedShakeTime + delta)) / currentShakeDuration, 0.f);
 				auto rotation = decay * random(randomEngine) * currentShakeStrenght * 0.35f; // 0.35 degrees per explosion ton
 
-				TRACE("Elap.: %.3f of %.3f, Decay: %f, Mag.: %f, Rot.: %.2f", elapsedShakeTime, currentShakeDuration, decay, currentShakeStrenght, rotation);
+				//TRACE("Elap.: %.3f of %.3f, Decay: %f, Mag.: %f, Rot.: %.2f", elapsedShakeTime, currentShakeDuration, decay, currentShakeStrenght, rotation);
 				
 				elapsedShakeTime += delta;
 				x += decay * random(randomEngine) * currentShakeStrenght;
@@ -47,7 +45,7 @@ public:
 
 	void handle(const Explosion& explosion) {
 		float impact = explosion.impact(x, y);
-
+		
 		// Check whether the explosion causes any impact on where we are
 		if (impact > 0.f) {
 			ERR("Explosion! Impact: %.3f, Duration: %.3f. Elapsed: %.3f, Total: %.3f", impact, explosion.duration, elapsedShakeTime, currentShakeDuration);

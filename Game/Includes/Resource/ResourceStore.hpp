@@ -18,8 +18,8 @@ class ResourceStore final
 {
 public:
 	static void load(const std::string& resourceFolder) {
-		load(resourceFolder, [](const std::string&) {
-			return Resource();
+		load(resourceFolder, [](const std::string& resource) {
+			return Resource(resource);
 		});
 	}
 

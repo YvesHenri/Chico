@@ -3,35 +3,44 @@
 #include <cmath>
 #include <Engine/Entities/System/System.hpp>
 
+#include "../Message/Weather.h"
 #include "../Component/Transform.h"
 #include "../Component/Motion.h"
 #include "../Component/Body.h"
 
-class KinematicSystem : public ecs::System
+class KinematicSystem : public ecs::SystemListener<Weather>
 {
 public:
-	void draw(float delta) override {}
-	void update(float delta) override {
-		entities->each<Transform, Motion, Body>([&](auto& e, auto& transform, auto& motion, auto& body) {
-			// Update acceleration
-			motion.ax = -motion.vx * body.weight * gravity;
-			motion.ay = -motion.vy * body.weight * gravity;
+	explicit KinematicSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {}
 
-			// Update velocity
-			motion.vx += motion.ax * delta;
-			motion.vy += motion.ay * delta;
+	void update(float time) override {
+		entities->each<Transform, Motion, Body>([&](auto& e, Transform& transform, Motion& motion, Body& body) {
+			auto terrainFriction = 5.123f; // 1 is no friction
+			auto shoesTraction = 0.f; // 0 is no traction (no shoes)
 
-			// Update position
-			transform.x -= motion.vx * delta;
-			transform.y -= motion.vy * delta;
+			auto friction = std::max(1.f, terrainFriction) + shoesTraction;
+			auto windForce = math::Vector::polar(windStrenght, math::Angle::radians(windAngle));
+			auto windAcceleration = windForce / body.mass; // Wind acceleration upon the entity
+			
+			motion.velocity += windAcceleration * time; // Apply wind
+			motion.velocity *= std::powf(1.f / friction, time); // Apply friction (dampening)
 
-			if (std::fabs(motion.vx * motion.vx + motion.vy * motion.vy) < 0.1f) {
-				motion.vx = 0.f;
-				motion.vy = 0.f;
-			}
+			auto displacement = motion.velocity * time;
+
+			transform.x += displacement.x;
+			transform.y -= displacement.y; // SFML uses reverse Y (-)
 		});
 	}
 
+	void handle(const Weather& weather) override {
+		TRACE("Weather changed! Force: %.2f, Angle: %.2f", weather.windForce, weather.windAngle.degrees());
+		windStrenght = weather.windForce;
+		windAngle = weather.windAngle.radians();
+	}
+
 private:
+	float windStrenght = 0.f;
+	float windAngle = 0.f;
 	float gravity = 0.0095f; // The greater, the slower
+	std::shared_ptr<sf::RenderWindow> window;
 };

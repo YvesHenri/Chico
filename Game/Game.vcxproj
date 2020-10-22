@@ -167,11 +167,13 @@
     <ClInclude Include="Includes\Component\Motion.h" />
     <ClInclude Include="Includes\Message\Collision.h" />
     <ClInclude Include="Includes\Message\Explosion.h" />
-    <ClInclude Include="Includes\Message\LoadCompleteMessage.h" />
-    <ClInclude Include="Includes\Message\LoadProgressMessage.h" />
-    <ClInclude Include="Includes\Message\LoadStartMessage.h" />
+    <ClInclude Include="Includes\Message\LoadedMessage.h" />
+    <ClInclude Include="Includes\Message\LoadingMessage.h" />
+    <ClInclude Include="Includes\Message\LoadMessage.h" />
     <ClInclude Include="Includes\Message\PauseGameMessage.h" />
     <ClInclude Include="Includes\Message\StartGameMessage.h" />
+    <ClInclude Include="Includes\Message\Weather.h" />
+    <ClInclude Include="Includes\Resource\Animator.h" />
     <ClInclude Include="Includes\Resource\ResourceStore.hpp" />
     <ClInclude Include="Includes\State\LoadingState.h" />
     <ClInclude Include="Includes\State\MenuState.h" />

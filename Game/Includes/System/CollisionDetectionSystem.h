@@ -10,8 +10,6 @@
 class CollisionDetectionSystem final : public ecs::System
 {
 public:
-	void draw(float dt) override {}
-
 	void update(float dt) override {
 		entities->each<Motion, Transform, Body>([&](auto& e1, auto& m1, auto& t1, auto& b1) {
 			entities->each<Motion, Transform, Body>([&](auto& e2, auto& m2, auto& t2, auto& b2) {

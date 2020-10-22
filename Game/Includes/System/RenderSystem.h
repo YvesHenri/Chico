@@ -18,24 +18,20 @@ public:
 		text.setFillColor(sf::Color::Black);
 	}
 
-	void draw(float delta) override {
-
-	}
-
 	void update(float dt) override {
 		sf::CircleShape shape;
 		sf::RectangleShape line;
 
 		shape.setOutlineThickness(1.5f);
 		shape.setOutlineColor(sf::Color::Black);
-		line.setOutlineThickness(1.f);
+		line.setOutlineThickness(0.75f);
 		line.setOutlineColor(sf::Color::Black);
 
-		entities->each<Body, Render, Transform>([&](auto& entity, auto& body, auto& render, auto& transform) {
+		entities->each<Body, Render, Transform, Motion>([&](auto& entity, auto& body, auto& render, auto& transform, auto& motion) {
 			// Entity shape
 			shape.setRadius(body.radius);
 			shape.setOrigin(shape.getRadius(), shape.getRadius());
-			shape.setPosition(transform.x, transform.y);
+			shape.setPosition(transform.x, transform.y); // SFML uses reverse coordinates (Y)
 			shape.setFillColor(render.color);
 
 			// Entity identifier
@@ -44,10 +40,10 @@ public:
 			text.setOrigin(rect.left + rect.width / 2.0f, rect.top + rect.height / 2.0f); // width / 2, height / 2
 			text.setPosition(transform.x, transform.y);
 
-			// Entity rotation cue
+			// Entity rotation cue (velocity)
 			line.setPosition(transform.x, transform.y);
 			line.setSize(sf::Vector2f(-body.radius, 0.f));
-			line.setRotation(transform.rotation);
+			line.setRotation(180 - motion.velocity.angle().degrees());
 
 			window->draw(shape);
 			window->draw(text);

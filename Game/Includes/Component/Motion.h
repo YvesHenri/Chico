@@ -1,16 +1,14 @@
 #pragma once
 
+#include <Engine/Mathematics.hpp>
+
 struct Motion
 {
-	explicit Motion(float speed = 300.f) : speed(speed) {}
+	explicit Motion(float speed = 64.f) : Motion(speed, speed * 75.f) {}
+	explicit Motion(float speed, float thrust) : speed(speed), thrust(thrust) {}
+
+	math::Vector velocity;
 
 	float speed;
-	float vx = 0.f, vy = 0.f; // Velocity
-	float ax = 0.f, ay = 0.f; // Acceleration
-
-	
-	float currentSpeed = 0.f;
-	float maximumSpeed = 200.f;
-	float acceleration = 200.f; // How fast will object reach a maximum speed
-	float deceleration = 100.f; // How fast will object reach a speed of 0
+	float thrust;
 };

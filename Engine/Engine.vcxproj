@@ -148,7 +148,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Engine.hpp" />
     <ClInclude Include="Entities\Component\Message\ComponentAdded.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollection.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollectionIntersection.hpp" />
@@ -160,6 +159,7 @@
     <ClInclude Include="Entities\Entity\EntityManager.hpp" />
     <ClInclude Include="Entities\System\System.hpp" />
     <ClInclude Include="Entities\System\SystemManager.hpp" />
+    <ClInclude Include="Mathematics.hpp" />
     <ClInclude Include="Messages\MessageHook.hpp" />
     <ClInclude Include="Family.hpp" />
     <ClInclude Include="Messages\MessageChannel.hpp" />
