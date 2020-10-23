@@ -74,7 +74,7 @@ ENTRY_POINT
 
 	// Message hooking for debugging purposes
 	messages->hook([](const mqs::Message& message) {
-		DEBUG("Hooked message: id = %d, uid = %d, family = %d", message.id, message.uid(), message.family);
+		//DEBUG("Hooked message: id = %d, uid = %d, family = %d", message.id, message.uid(), message.family);
 	});
 
 	// State transition setup
@@ -100,7 +100,7 @@ ENTRY_POINT
 	systems->add<CollisionDetectionSystem>();
 	systems->add<CollisionResolverSystem>();
 	systems->add<CameraSystem>(window);
-	systems->add<BackgroundSystem>();
+	systems->add<BackgroundSystem>(window);
 	systems->add<RenderSystem>(window);
 	systems->add<DebugSystem>(window);
 
@@ -122,14 +122,7 @@ ENTRY_POINT
 	enemy.assign<Body>(2.5f);
 	enemy.assign<Motion>();
 	enemy.assign<Transform>(500.f, 100.f);
-	enemy.assign<Render>(sf::Color::Yellow);	
-
-	TextureStore::get("grid.png").setRepeated(true);
-
-	sf::Sprite background;
-	background.setTexture(TextureStore::get("grid.png"));
-	background.setTextureRect(sf::IntRect(0, 0, 5000, 5000));
-	background.setPosition(-2500.f, -2500.f);
+	enemy.assign<Render>(sf::Color::Yellow);
 
 	while (window->isOpen())
 	{
@@ -211,11 +204,8 @@ ENTRY_POINT
 			}
 		}
 
-		float delta = clock.restart().asSeconds();
-
 		window->clear(sf::Color(128, 128, 128));
-		window->draw(background);
-		states->update(delta);
+		states->update(clock.restart().asSeconds());
 		window->display();
 	}
 

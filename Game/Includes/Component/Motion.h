@@ -9,6 +9,6 @@ struct Motion
 
 	math::Vector velocity;
 
-	float speed;
+	float speed; // Max
 	float thrust;
 };

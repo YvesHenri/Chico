@@ -22,7 +22,7 @@ public:
 		sf::CircleShape shape;
 		sf::RectangleShape line;
 
-		shape.setOutlineThickness(1.5f);
+		shape.setOutlineThickness(1.f);
 		shape.setOutlineColor(sf::Color::Black);
 		line.setOutlineThickness(0.75f);
 		line.setOutlineColor(sf::Color::Black);
@@ -31,7 +31,7 @@ public:
 			// Entity shape
 			shape.setRadius(body.radius);
 			shape.setOrigin(shape.getRadius(), shape.getRadius());
-			shape.setPosition(transform.x, transform.y); // SFML uses reverse coordinates (Y)
+			shape.setPosition(transform.x, transform.y);
 			shape.setFillColor(render.color);
 
 			// Entity identifier

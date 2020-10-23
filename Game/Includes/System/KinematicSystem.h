@@ -22,8 +22,9 @@ public:
 			auto windForce = math::Vector::polar(windStrenght, math::Angle::radians(windAngle));
 			auto windAcceleration = windForce / body.mass; // Wind acceleration upon the entity
 			
-			motion.velocity += windAcceleration * time; // Apply wind
-			motion.velocity *= std::powf(1.f / friction, time); // Apply friction (dampening)
+			// Apply wind and friction
+			motion.velocity += windAcceleration * time;
+			motion.velocity *= std::powf(1.f / friction, time);
 
 			auto displacement = motion.velocity * time;
 
@@ -41,6 +42,5 @@ public:
 private:
 	float windStrenght = 0.f;
 	float windAngle = 0.f;
-	float gravity = 0.0095f; // The greater, the slower
 	std::shared_ptr<sf::RenderWindow> window;
 };

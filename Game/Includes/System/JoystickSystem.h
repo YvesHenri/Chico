@@ -14,7 +14,7 @@ class JoystickSystem : public ecs::System
 {
 public:
 	void update(float time) override {
-		entities->each<Joystick, Motion, Body>([&](auto& entity, Joystick& joystick, Motion& motion, Body& body) {
+		entities->each<Joystick, Motion, Body>([&](auto& entity, auto& joystick, auto& motion, auto& body) {
 			auto x = 0.f;
 			auto y = 0.f;
 			auto input = false;
@@ -42,6 +42,7 @@ public:
 				y *= 1.2f;
 			}
 
+			// TODO: Cap max speed
 			if (input) {
 				math::Vector direction(x, y);
 				math::Vector acceleration = (direction * motion.thrust) / body.mass;
