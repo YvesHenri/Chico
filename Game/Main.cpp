@@ -29,6 +29,7 @@
 #include "Includes/System/RenderSystem.h"
 #include "Includes/System/JoystickSystem.h"
 #include "Includes/System/DebugSystem.h"
+#include "Includes/System/CollisionSystem.h"
 #include "Includes/System/CollisionResolverSystem.h"
 #include "Includes/System/CollisionDetectionSystem.h"
 #include "Includes/System/CameraSystem.h"
@@ -36,6 +37,8 @@
 #include "Includes/System/WeatherSystem.h"
 
 #include "Includes/Resource/ResourceStore.hpp"
+
+#include <stack>
 
 #ifdef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:console")
@@ -57,6 +60,9 @@ ENTRY_POINT
 	auto entities = std::make_shared<ecs::EntityManager>(messages);
 	auto systems = std::make_shared<ecs::SystemManager>(entities, messages);
 	auto states = std::make_shared<sts::StateManager>(messages); // (systems, messages)
+
+	std::stack<unsigned> actions;
+	QuadTree tree(0.f, 0.f, 800.f, 600.f);
 
 	// Resources startup: Fonts
 	FontStore::load("Resources\\Fonts", [](const std::string& path) {
@@ -94,13 +100,14 @@ ENTRY_POINT
 		*/
 
 	// System registration
-	systems->add<WeatherSystem>();
-	systems->add<JoystickSystem>();
+	//systems->add<WeatherSystem>();	
+	systems->add<JoystickSystem>(window);
 	systems->add<KinematicSystem>(window);
-	systems->add<CollisionDetectionSystem>();
-	systems->add<CollisionResolverSystem>();
-	systems->add<CameraSystem>(window);
-	systems->add<BackgroundSystem>(window);
+	//systems->add<CollisionSystem>(window);
+	//systems->add<CollisionDetectionSystem>();
+	//systems->add<CollisionResolverSystem>();
+	//systems->add<CameraSystem>(window);
+	//systems->add<BackgroundSystem>(window);
 	systems->add<RenderSystem>(window);
 	systems->add<DebugSystem>(window);
 
@@ -109,20 +116,25 @@ ENTRY_POINT
 	window->setKeyRepeatEnabled(true);
 	window->setVerticalSyncEnabled(false);
 	window->setFramerateLimit(60);
-
+	
 	auto player = entities->create();
+	/*
 	player.assign<Body>(1.f);
 	player.assign<Motion>();	
 	player.assign<Transform>(400.f, 300.f);
-	player.assign<Render>(sf::Color::Red);
+	player.assign<Render>(sf::Color(128, 128, 128));
 	player.assign<Joystick>();
 	player.assign<Camera>();
+	
+	*/
 
-	auto enemy = entities->create();
-	enemy.assign<Body>(2.5f);
-	enemy.assign<Motion>();
-	enemy.assign<Transform>(500.f, 100.f);
-	enemy.assign<Render>(sf::Color::Yellow);
+	sf::RectangleShape cursor;
+	cursor.setSize(sf::Vector2f(150.f, 150.f));
+	cursor.setOrigin(cursor.getSize().x / 2.f, cursor.getSize().y / 2.f);
+	cursor.setOutlineThickness(1.2f);
+	cursor.setOutlineColor(sf::Color::Black);
+	cursor.setFillColor(sf::Color::Transparent);
+	//cursor.setRotation(45.f);
 
 	while (window->isOpen())
 	{
@@ -136,68 +148,84 @@ ENTRY_POINT
 				window->close();
 				break;
 			// Debugging
+			case sf::Event::MouseMoved:
+				cursor.setPosition(event.mouseMove.x, event.mouseMove.y);
+				break;
 			case sf::Event::MouseButtonPressed:
-				switch (event.mouseButton.button)
-				{
-				case sf::Mouse::Left:
+				if (event.mouseButton.button == sf::Mouse::Left)
 				{
 					auto e = entities->create();
 					auto v = window->getView().getCenter();
 					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-					e.assign<Body>(rand() % 2 + 1);
+					//e.assign<Body>(1.f, rand() % 112 + 16);
+					e.assign<Body>(1.f, 32.f);
 					e.assign<Motion>();
 					e.assign<Render>(sf::Color(rand() % 255, rand() % 255, rand() % 255));
 					e.assign<Transform>(p.x, p.y);
-					break;
+					tree.addCircle(e.id(), p.x, p.y, e.component<Body>().radius);
+					actions.push(e.id());
 				}
-				case sf::Mouse::Right:
+				if (event.mouseButton.button == sf::Mouse::Right)
 				{
-					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-					messages->publish<Explosion>(rand() % 20 + 10, p.x, p.y);
+					auto qqx = cursor.getPosition().x - cursor.getOrigin().x;
+					auto qqy = cursor.getPosition().y - cursor.getOrigin().y;
+					std::vector<std::shared_ptr<QuadNode>> n;
+					tree.query(qqx, qqy, cursor.getSize().x, cursor.getSize().y, n);
+					DEBUG("Fetched %d entities:", n.size());
+					for (auto& entity : n) {
+						DEBUG("%d", entity->id);
+					}
+					//auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+					//messages->publish<Explosion>(rand() % 20 + 10, p.x, p.y);
 					break;
-				}
 				}
 				break;
 			case sf::Event::KeyPressed:
 				switch (event.key.code)
 				{
-				case sf::Keyboard::Return:
-					break;
-				case sf::Keyboard::Num1:
-					player.assign<Camera>();
-					enemy.remove<Camera>();
-					player.assign<Joystick>();
-					enemy.remove<Joystick>();
-					break;
-				case sf::Keyboard::Num2:
-					player.remove<Camera>();
-					enemy.assign<Camera>();
-					player.remove<Joystick>();
-					enemy.assign<Joystick>();
-					break;
-				case sf::Keyboard::Num3:
-					break;
-				case sf::Keyboard::Num4:
-					break;
-				case sf::Keyboard::Num8:
-					//messages->publish<Explosion>(25.f, player.component<Transform>().x - 20.f, player.component<Transform>().y);
-					break;
-				case sf::Keyboard::Num9:
-					//messages->publish<Explosion>(25.f, player.component<Transform>().x, player.component<Transform>().y);
-					break;
 				case sf::Keyboard::Escape:
 					messages->publish<PauseGameMessage>();
 					break;
 				case sf::Keyboard::Space:
 					window->close();
 					break;
-				case sf::Keyboard::Up:
+				case sf::Keyboard::W:
+				{
+					auto view = window->getView();
+					view.move(0.f, -15.f);
+					window->setView(view);
+				}
 					break;
-				case sf::Keyboard::Down:
+				case sf::Keyboard::S:
+				{
+					auto view = window->getView();
+					view.move(0.f, 15.f);
+					window->setView(view);
+				}
 					break;
-				case sf::Keyboard::Left:
+				case sf::Keyboard::A:
+				{
+					auto view = window->getView();
+					view.move(-15.f, 0.f);
+					window->setView(view);
+				}
 					break;
-				case sf::Keyboard::Right:
+				case sf::Keyboard::D:
+				{
+					auto view = window->getView();
+					view.move(15.f, 0.f);
+					window->setView(view);
+				}
+					break;
+				case sf::Keyboard::Z:
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
+						if (!actions.empty()) {
+							auto id = actions.top();
+							DEBUG("Destroying %d", id);
+							entities->destroy(id);
+							actions.pop();
+						}
+					}
 					break;
 				}
 				break;
@@ -206,6 +234,8 @@ ENTRY_POINT
 
 		window->clear(sf::Color(128, 128, 128));
 		states->update(clock.restart().asSeconds());
+		tree.draw(*window);
+		window->draw(cursor);
 		window->display();
 	}
 

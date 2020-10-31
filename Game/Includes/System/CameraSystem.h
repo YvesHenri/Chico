@@ -15,9 +15,9 @@ public:
 	explicit CameraSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window), random(-1.f, 1.f) {}
 
 	void update(float delta) {
+		auto view = window->getView();
+
 		entities->each<Camera, Transform>([&](auto& entity, auto& camera, auto& transform) {
-			auto view = window->getView();
-			
 			// Lerp positions for smooth chasing
 			elapsedChaseTime = std::min(elapsedChaseTime + smoothChaseFactor, 1.f);
 			x = (1.f - elapsedChaseTime) * x + elapsedChaseTime * transform.x;
@@ -39,8 +39,9 @@ public:
 
 			// Apply
 			view.setCenter(x, y);
-			window->setView(view);
 		});
+
+		window->setView(view);
 	}
 
 	void handle(const Explosion& explosion) {

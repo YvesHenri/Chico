@@ -14,7 +14,7 @@ class RenderSystem : public ecs::System
 public:
 	explicit RenderSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
 		text.setFont(FontStore::get("Carlito.ttf"));
-		text.setCharacterSize(28U);
+		text.setCharacterSize(24U);
 		text.setFillColor(sf::Color::Black);
 	}
 
@@ -42,8 +42,8 @@ public:
 
 			// Entity rotation cue (velocity)
 			line.setPosition(transform.x, transform.y);
-			line.setSize(sf::Vector2f(-body.radius, 0.f));
-			line.setRotation(180 - motion.velocity.angle().degrees());
+			line.setSize(sf::Vector2f(body.radius + 16.f, 0.f));
+			line.setRotation(motion.velocity.angle().degrees());
 
 			window->draw(shape);
 			window->draw(text);

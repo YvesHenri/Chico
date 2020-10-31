@@ -5,11 +5,11 @@
 
 struct Weather : public mqs::ManagedMessage<Weather>
 {
-	explicit Weather(float windForce, math::Angle windAngle) 
+	explicit Weather(float windStrenght, math::Angle windAngle)
 		: ManagedMessage(1U)
-		, windForce(windForce)
+		, windStrenght(windStrenght)
 		, windAngle(windAngle) {};
 
-	float windForce;
+	float windStrenght;
 	math::Angle windAngle;
 };

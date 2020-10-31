@@ -153,12 +153,17 @@
     <ClInclude Include="Entities\Component\ComponentCollectionIntersection.hpp" />
     <ClInclude Include="Entities\Component\Message\ComponentRemoved.hpp" />
     <ClInclude Include="Entities\Component\ComponentView.hpp" />
+    <ClInclude Include="Entities\Component\Message\EntityAdded.hpp" />
+    <ClInclude Include="Entities\Component\Message\EntityRemoved.hpp" />
     <ClInclude Include="Entities\Entity\Entity.h" />
     <ClInclude Include="Entities\Entity\Entity.hpp" />
     <ClInclude Include="Entities\Entity\EntityManager.h" />
     <ClInclude Include="Entities\Entity\EntityManager.hpp" />
     <ClInclude Include="Entities\System\System.hpp" />
     <ClInclude Include="Entities\System\SystemManager.hpp" />
+    <ClInclude Include="Mathematics\Geometry.hpp" />
+    <ClInclude Include="Mathematics\Shape.h" />
+    <ClInclude Include="Mathematics\Shape.hpp" />
     <ClInclude Include="Mathematics.hpp" />
     <ClInclude Include="Messages\MessageHook.hpp" />
     <ClInclude Include="Family.hpp" />

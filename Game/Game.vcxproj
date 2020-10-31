@@ -173,6 +173,8 @@
     <ClInclude Include="Includes\Message\PauseGameMessage.h" />
     <ClInclude Include="Includes\Message\StartGameMessage.h" />
     <ClInclude Include="Includes\Message\Weather.h" />
+    <ClInclude Include="Includes\QuadTree.hpp" />
+    <ClInclude Include="Includes\QuadNode.hpp" />
     <ClInclude Include="Includes\Resource\Animator.h" />
     <ClInclude Include="Includes\Resource\ResourceStore.hpp" />
     <ClInclude Include="Includes\State\LoadingState.h" />
@@ -186,6 +188,7 @@
     <ClInclude Include="Includes\System\CameraSystem.h" />
     <ClInclude Include="Includes\System\CollisionDetectionSystem.h" />
     <ClInclude Include="Includes\System\CollisionResolverSystem.h" />
+    <ClInclude Include="Includes\System\CollisionSystem.h" />
     <ClInclude Include="Includes\System\DebugSystem.h" />
     <ClInclude Include="Includes\System\JoystickSystem.h" />
     <ClInclude Include="Includes\System\KinematicSystem.h" />

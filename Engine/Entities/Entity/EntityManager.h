@@ -4,6 +4,8 @@
 #include <memory>
 
 #include "../Component/ComponentView.hpp"
+#include "../Component/Message/EntityAdded.hpp"
+#include "../Component/Message/EntityRemoved.hpp"
 
 namespace ecs
 {

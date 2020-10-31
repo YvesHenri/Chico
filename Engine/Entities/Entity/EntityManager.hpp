@@ -32,6 +32,8 @@ namespace ecs
 			entities.push_back(id);
 		}
 
+		messages->publish<EntityAdded>(id);
+
 		return Entity(id, this);
 	}
 
@@ -216,6 +218,8 @@ namespace ecs
 				collection->remove(entityId);
 			}
 		}
+
+		messages->publish<EntityRemoved>(entityId);
 	}
 
 	template <typename Component>

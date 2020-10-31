@@ -28,14 +28,18 @@ public:
 	}
 
 	void update(float dt) override {
-		entities->each<Motion, Transform, Body>([&](auto& entity, auto& motion, auto& transform, auto& body) {
-			auto fixed = window->getDefaultView();
-			auto current = window->getView();
-			
-			// FPS
-			window->setTitle("FPS: " + std::to_string(1.f / dt));
-			window->setView(fixed);			
+		auto fixed = window->getDefaultView();
+		auto current = window->getView();
+		auto fps = 1.f / dt;
 
+		if (fps < minFPS) {
+			minFPS = fps;
+		}
+
+		window->setTitle("FPS: " + std::to_string(fps) + " - Min: " + std::to_string(minFPS));
+		window->setView(fixed);
+
+		entities->each<Motion, Transform, Body>([&](auto& entity, auto& motion, auto& transform, auto& body) {			
 			// Player stats
 			if (entity.has<Joystick>()) {
 				drawText(5.f, 4.f, sf::Color::Black, "Velocity = " + std::to_string(motion.velocity.x) + ", " + std::to_string(motion.velocity.y) + " = " + std::to_string(motion.velocity.magnitude()));
@@ -47,11 +51,11 @@ public:
 			}
 
 			// Cartesian plane
-			window->draw(xaxis, 2, sf::PrimitiveType::Lines);
-			window->draw(yaxis, 2, sf::PrimitiveType::Lines);
-
-			window->setView(current);
+			//window->draw(xaxis, 2, sf::PrimitiveType::Lines);
+			//window->draw(yaxis, 2, sf::PrimitiveType::Lines);
 		});
+
+		window->setView(current);
 	}
 
 private:
@@ -63,6 +67,7 @@ private:
 	}
 
 private:
+	float minFPS = 60.f;
 	sf::Text text;
 	sf::Vertex xaxis[2];
 	sf::Vertex yaxis[2];

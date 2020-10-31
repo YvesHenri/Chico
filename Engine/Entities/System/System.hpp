@@ -41,7 +41,7 @@ namespace ecs
 		}
 
 	private:
-		std::vector<mqs::SignalConnection> connections; // Avoid copy problems
+		std::vector<mqs::SignalConnection> connections; // TODO Use single object instead
 	};
 
 	// 1+ arguments specialization

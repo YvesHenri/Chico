@@ -134,5 +134,14 @@
     <ClInclude Include="Includes\Message\Weather.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\System\CollisionSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\QuadNode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\QuadTree.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
