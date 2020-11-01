@@ -28,15 +28,15 @@ public:
 	explicit CircleNode(unsigned id, float cx, float cy, float radius) : QuadNode(id, cx, cy), radius(radius) {}
 
     bool fits(float x, float y, float width, float height) const override {
-        return Geometry::overlaps(x, y, width, height, this->x, this->y, this->radius);
+        return Geometry::rectangleOverlapsCircle(x, y, width, height, this->x, this->y, this->radius);
     }
 
     bool intersects(float x, float y, float radius) const override {
-        return Geometry::intersects(this->x, this->y, this->radius, x, y, radius);
+        return Geometry::circleIntersectsCircle(this->x, this->y, this->radius, x, y, radius);
     }
 
     bool intersects(float x, float y, float width, float height) const override {
-        return Geometry::intersects(this->x, this->y, this->radius, x, y, width, height);
+        return Geometry::circleIntersectsRectangle(this->x, this->y, this->radius, x, y, width, height);
     }
 
     float radius;
@@ -51,15 +51,15 @@ public:
 	explicit RectangleNode(unsigned id, float x, float y, float width, float height) : QuadNode(id, x, y), width(width), height(height) {}
 
     bool fits(float x, float y, float width, float height) const override {
-        return Geometry::overlaps(x, y, width, height, this->x, this->y, this->width, this->height);
+        return Geometry::rectangleOverlapsRectangle(x, y, width, height, this->x, this->y, this->width, this->height);
     }
 
     bool intersects(float x, float y, float radius) const override {
-        return Geometry::intersects(x, y, radius, this->x, this->y, this->width, this->height);
+        return Geometry::rectangleIntersectsCircle(this->x, this->y, this->width, this->height, x, y, radius);
     }
 
     bool intersects(float x, float y, float width, float height) const override {
-        return Geometry::intersects(x, y, width, height, this->x, this->y, this->width, this->height);
+        return Geometry::rectangleIntersectsRectangle(x, y, width, height, this->x, this->y, this->width, this->height);
     }
 
     float width;

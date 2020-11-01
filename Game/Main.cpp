@@ -129,12 +129,28 @@ ENTRY_POINT
 	*/
 
 	sf::RectangleShape cursor;
-	cursor.setSize(sf::Vector2f(150.f, 150.f));
+	cursor.setSize(sf::Vector2f(50.f, 50.f));
 	cursor.setOrigin(cursor.getSize().x / 2.f, cursor.getSize().y / 2.f);
 	cursor.setOutlineThickness(1.2f);
 	cursor.setOutlineColor(sf::Color::Black);
 	cursor.setFillColor(sf::Color::Transparent);
 	//cursor.setRotation(45.f);
+
+	sf::RectangleShape rectangle;
+	rectangle.setSize(sf::Vector2f(200.f, 200.f));
+	rectangle.setOrigin(rectangle.getSize().x / 2.f, rectangle.getSize().y / 2.f);
+	rectangle.setPosition(400.f, 300.f);
+	rectangle.setOutlineThickness(1.f);
+	rectangle.setOutlineColor(sf::Color::Black);
+	rectangle.setFillColor(sf::Color::Transparent);
+
+	sf::CircleShape circle;
+	circle.setRadius(64.f);
+	circle.setOrigin(circle.getRadius(), circle.getRadius());
+	circle.setPosition(400.f, 300.f);
+	circle.setOutlineThickness(1.f);
+	circle.setOutlineColor(sf::Color::Black);
+	circle.setFillColor(sf::Color::Transparent);
 
 	while (window->isOpen())
 	{
@@ -236,6 +252,48 @@ ENTRY_POINT
 		states->update(clock.restart().asSeconds());
 		tree.draw(*window);
 		window->draw(cursor);
+
+		auto mx = cursor.getPosition().x - (cursor.getSize().x / 2.f);
+		auto my = cursor.getPosition().y - (cursor.getSize().y / 2.f);
+		auto mw = cursor.getSize().x;
+		auto mh = cursor.getSize().y;
+
+		auto cx = circle.getPosition().x;
+		auto cy = circle.getPosition().y;
+		auto cr = circle.getRadius();
+
+		auto rx = rectangle.getPosition().x - (rectangle.getSize().x / 2.f);
+		auto ry = rectangle.getPosition().y - (rectangle.getSize().y / 2.f);
+		auto rw = rectangle.getSize().x;
+		auto rh = rectangle.getSize().y;
+
+		if (Geometry::rectangleOverlapsRectangle(rx, ry, rw, rh, mx, my, mw, mh)) {
+			rectangle.setOutlineColor(sf::Color::Red);
+		}
+		else {
+			if (Geometry::rectangleIntersectsRectangle(rx, ry, rw, rh, mx, my, mw, mh)) {
+				rectangle.setOutlineColor(sf::Color::Yellow);
+			}
+			else {
+				rectangle.setOutlineColor(sf::Color::Black);
+			}
+		}
+
+		if (Geometry::circleOverlapsRectangle(cx, cy, cr, mx, my, mw, mh)) {
+			circle.setOutlineColor(sf::Color::Red);
+		}
+		else {
+			if (Geometry::circleIntersectsRectangle(cx, cy, cr, mx, my, mw, mh)) {
+				circle.setOutlineColor(sf::Color::Yellow);
+			}
+			else {
+				circle.setOutlineColor(sf::Color::Black);
+			}
+		}
+
+		window->draw(circle);
+		window->draw(rectangle);
+
 		window->display();
 	}
 
