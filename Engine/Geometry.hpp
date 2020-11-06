@@ -91,8 +91,8 @@ public:
 	* @param rh Rectangle's height
 	*/
 	static bool circleOverlapsRectangle(float cx, float cy, float cr, float rx, float ry, float rw, float rh) {
-		auto dx = std::fmaxf(std::fabsf(cx - rx), std::fabsf(rx + rw - cx));
-		auto dy = std::fmaxf(std::fabsf(cy - ry), std::fabsf(ry + rh - cy));
+		auto dx = std::fmaxf(std::abs(cx - rx), std::abs(rx + rw - cx));
+		auto dy = std::fmaxf(std::abs(cy - ry), std::abs(ry + rh - cy));
 		return cr * cr >= (dx * dx) + (dy * dy);
 	}
 

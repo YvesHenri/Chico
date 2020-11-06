@@ -173,8 +173,6 @@
     <ClInclude Include="Includes\Message\PauseGameMessage.h" />
     <ClInclude Include="Includes\Message\StartGameMessage.h" />
     <ClInclude Include="Includes\Message\Weather.h" />
-    <ClInclude Include="Includes\QuadTree.hpp" />
-    <ClInclude Include="Includes\QuadNode.hpp" />
     <ClInclude Include="Includes\Resource\Animator.h" />
     <ClInclude Include="Includes\Resource\ResourceStore.hpp" />
     <ClInclude Include="Includes\State\LoadingState.h" />

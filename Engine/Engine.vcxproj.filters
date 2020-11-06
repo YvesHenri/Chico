@@ -96,13 +96,19 @@
     <ClInclude Include="Entities\Component\Message\EntityRemoved.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mathematics\Geometry.hpp">
+    <ClInclude Include="Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mathematics\Shape.h">
+    <ClInclude Include="Data\Quad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mathematics\Shape.hpp">
+    <ClInclude Include="Data\QuadShape.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\QuadTree.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\QuadNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

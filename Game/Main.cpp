@@ -185,7 +185,7 @@ ENTRY_POINT
 				{
 					auto qqx = cursor.getPosition().x - cursor.getOrigin().x;
 					auto qqy = cursor.getPosition().y - cursor.getOrigin().y;
-					std::vector<std::shared_ptr<QuadNode>> n;
+					std::vector<std::shared_ptr<qdt::Node>> n;
 					tree.query(qqx, qqy, cursor.getSize().x, cursor.getSize().y, n);
 					DEBUG("Fetched %d entities:", n.size());
 					for (auto& entity : n) {
@@ -250,7 +250,6 @@ ENTRY_POINT
 
 		window->clear(sf::Color(128, 128, 128));
 		states->update(clock.restart().asSeconds());
-		tree.draw(*window);
 		window->draw(cursor);
 
 		auto mx = cursor.getPosition().x - (cursor.getSize().x / 2.f);

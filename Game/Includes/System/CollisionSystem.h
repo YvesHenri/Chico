@@ -4,9 +4,8 @@
 #include <Engine/Entities/System/System.hpp>
 #include <Engine/Entities/Component/Message/EntityAdded.hpp>
 #include <Engine/Entities/Component/Message/EntityRemoved.hpp>
-//#include <Engine/Structures/QuadTree.hpp>
+#include <Engine/Data/QuadTree.hpp>
 
-#include "../QuadTree.hpp"
 #include "../Message/Collision.h"
 #include "../Component/Transform.h"
 #include "../Component/Motion.h"
@@ -18,12 +17,14 @@ public:
 	CollisionSystem(const std::shared_ptr<sf::RenderWindow>& window) : quadTree(0.f, 0.f, 400.f, 300.f), window(window) {}
 
 	void update(float dt) override {
+		std::vector<std::shared_ptr<qdt::Node>> candidates;
+
 		quadTree.clear();
 		entities->each<Motion, Transform, Body>([&](auto& entity, auto& motion, auto& transform, auto& body) {
 			//quadTree.addCircle(transform.x, transform.y, body.radius);
 		});
 
-		quadTree.draw(*window);
+		quadTree.query(0.f, 0.f, 0.f, 0.f, candidates);
 	}
 
 	void handle(const EntityAdded& message) override {
