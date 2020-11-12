@@ -30,8 +30,6 @@
 #include "Includes/System/JoystickSystem.h"
 #include "Includes/System/DebugSystem.h"
 #include "Includes/System/CollisionSystem.h"
-#include "Includes/System/CollisionResolverSystem.h"
-#include "Includes/System/CollisionDetectionSystem.h"
 #include "Includes/System/CameraSystem.h"
 #include "Includes/System/BackgroundSystem.h"
 #include "Includes/System/WeatherSystem.h"
@@ -39,6 +37,7 @@
 #include "Includes/Resource/ResourceStore.hpp"
 
 #include <stack>
+#include "Includes/DQuadTree.hpp"
 
 #ifdef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:console")
@@ -53,7 +52,7 @@ ENTRY_POINT
 	// SFML startup
 	auto clock = sf::Clock();
 	auto video = sf::VideoMode(800U, 600U);
-	auto window = std::make_shared<sf::RenderWindow>(video, "", sf::Style::Titlebar | sf::Style::Close);
+	auto window = sf::RenderWindow(video, "", sf::Style::Titlebar | sf::Style::Close);
 
 	// Managers startup
 	auto messages = std::make_shared<mqs::MessageManager>();
@@ -62,7 +61,6 @@ ENTRY_POINT
 	auto states = std::make_shared<sts::StateManager>(messages); // (systems, messages)
 
 	std::stack<unsigned> actions;
-	QuadTree tree(0.f, 0.f, 800.f, 600.f);
 
 	// Resources startup: Fonts
 	FontStore::load("Resources\\Fonts", [](const std::string& path) {
@@ -102,96 +100,54 @@ ENTRY_POINT
 	// System registration
 	//systems->add<WeatherSystem>();	
 	systems->add<JoystickSystem>(window);
-	systems->add<KinematicSystem>(window);
-	//systems->add<CollisionSystem>(window);
-	//systems->add<CollisionDetectionSystem>();
-	//systems->add<CollisionResolverSystem>();
+	systems->add<KinematicSystem>();
+	systems->add<CollisionSystem>(window);
 	//systems->add<CameraSystem>(window);
-	//systems->add<BackgroundSystem>(window);
+	systems->add<BackgroundSystem>(window);
 	systems->add<RenderSystem>(window);
 	systems->add<DebugSystem>(window);
 
 	// SFML window setup
-	window->setMouseCursorVisible(true);
-	window->setKeyRepeatEnabled(true);
-	window->setVerticalSyncEnabled(false);
-	window->setFramerateLimit(60);
+	window.setMouseCursorVisible(true);
+	window.setKeyRepeatEnabled(true);
+	window.setVerticalSyncEnabled(false);
+	window.setFramerateLimit(60);
 	
 	auto player = entities->create();
-	/*
 	player.assign<Body>(1.f);
 	player.assign<Motion>();	
 	player.assign<Transform>(400.f, 300.f);
 	player.assign<Render>(sf::Color(128, 128, 128));
 	player.assign<Joystick>();
 	player.assign<Camera>();
-	
-	*/
 
-	sf::RectangleShape cursor;
-	cursor.setSize(sf::Vector2f(50.f, 50.f));
-	cursor.setOrigin(cursor.getSize().x / 2.f, cursor.getSize().y / 2.f);
-	cursor.setOutlineThickness(1.2f);
-	cursor.setOutlineColor(sf::Color::Black);
-	cursor.setFillColor(sf::Color::Transparent);
-	//cursor.setRotation(45.f);
-
-	sf::RectangleShape rectangle;
-	rectangle.setSize(sf::Vector2f(200.f, 200.f));
-	rectangle.setOrigin(rectangle.getSize().x / 2.f, rectangle.getSize().y / 2.f);
-	rectangle.setPosition(400.f, 300.f);
-	rectangle.setOutlineThickness(1.f);
-	rectangle.setOutlineColor(sf::Color::Black);
-	rectangle.setFillColor(sf::Color::Transparent);
-
-	sf::CircleShape circle;
-	circle.setRadius(64.f);
-	circle.setOrigin(circle.getRadius(), circle.getRadius());
-	circle.setPosition(400.f, 300.f);
-	circle.setOutlineThickness(1.f);
-	circle.setOutlineColor(sf::Color::Black);
-	circle.setFillColor(sf::Color::Transparent);
-
-	while (window->isOpen())
+	while (window.isOpen())
 	{
 		sf::Event event;
 
-		while (window->pollEvent(event))
+		while (window.pollEvent(event))
 		{
 			switch (event.type)
 			{
 			case sf::Event::Closed:
-				window->close();
-				break;
-			// Debugging
-			case sf::Event::MouseMoved:
-				cursor.setPosition(event.mouseMove.x, event.mouseMove.y);
+				window.close();
 				break;
 			case sf::Event::MouseButtonPressed:
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
 					auto e = entities->create();
-					auto v = window->getView().getCenter();
-					auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-					//e.assign<Body>(1.f, rand() % 112 + 16);
-					e.assign<Body>(1.f, 32.f);
+					auto v = window.getView().getCenter();
+					auto p = window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+					e.assign<Body>(1.f, rand() % 112 + 16);
 					e.assign<Motion>();
 					e.assign<Render>(sf::Color(rand() % 255, rand() % 255, rand() % 255));
 					e.assign<Transform>(p.x, p.y);
-					tree.addCircle(e.id(), p.x, p.y, e.component<Body>().radius);
+					//tree.addCircle(e.id(), p.x, p.y, e.component<Body>().radius);
 					actions.push(e.id());
 				}
 				if (event.mouseButton.button == sf::Mouse::Right)
 				{
-					auto qqx = cursor.getPosition().x - cursor.getOrigin().x;
-					auto qqy = cursor.getPosition().y - cursor.getOrigin().y;
-					std::vector<std::shared_ptr<qdt::Node>> n;
-					tree.query(qqx, qqy, cursor.getSize().x, cursor.getSize().y, n);
-					DEBUG("Fetched %d entities:", n.size());
-					for (auto& entity : n) {
-						DEBUG("%d", entity->id);
-					}
-					//auto p = window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+					//auto p = window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 					//messages->publish<Explosion>(rand() % 20 + 10, p.x, p.y);
 					break;
 				}
@@ -199,38 +155,35 @@ ENTRY_POINT
 			case sf::Event::KeyPressed:
 				switch (event.key.code)
 				{
-				case sf::Keyboard::Escape:
-					messages->publish<PauseGameMessage>();
-					break;
 				case sf::Keyboard::Space:
-					window->close();
+					window.close();
 					break;
 				case sf::Keyboard::W:
 				{
-					auto view = window->getView();
+					auto view = window.getView();
 					view.move(0.f, -15.f);
-					window->setView(view);
+					window.setView(view);
 				}
 					break;
 				case sf::Keyboard::S:
 				{
-					auto view = window->getView();
+					auto view = window.getView();
 					view.move(0.f, 15.f);
-					window->setView(view);
+					window.setView(view);
 				}
 					break;
 				case sf::Keyboard::A:
 				{
-					auto view = window->getView();
+					auto view = window.getView();
 					view.move(-15.f, 0.f);
-					window->setView(view);
+					window.setView(view);
 				}
 					break;
 				case sf::Keyboard::D:
 				{
-					auto view = window->getView();
+					auto view = window.getView();
 					view.move(15.f, 0.f);
-					window->setView(view);
+					window.setView(view);
 				}
 					break;
 				case sf::Keyboard::Z:
@@ -248,52 +201,10 @@ ENTRY_POINT
 			}
 		}
 
-		window->clear(sf::Color(128, 128, 128));
+		window.clear(sf::Color(128, 128, 128));
 		states->update(clock.restart().asSeconds());
-		window->draw(cursor);
-
-		auto mx = cursor.getPosition().x - (cursor.getSize().x / 2.f);
-		auto my = cursor.getPosition().y - (cursor.getSize().y / 2.f);
-		auto mw = cursor.getSize().x;
-		auto mh = cursor.getSize().y;
-
-		auto cx = circle.getPosition().x;
-		auto cy = circle.getPosition().y;
-		auto cr = circle.getRadius();
-
-		auto rx = rectangle.getPosition().x - (rectangle.getSize().x / 2.f);
-		auto ry = rectangle.getPosition().y - (rectangle.getSize().y / 2.f);
-		auto rw = rectangle.getSize().x;
-		auto rh = rectangle.getSize().y;
-
-		if (Geometry::rectangleOverlapsRectangle(rx, ry, rw, rh, mx, my, mw, mh)) {
-			rectangle.setOutlineColor(sf::Color::Red);
-		}
-		else {
-			if (Geometry::rectangleIntersectsRectangle(rx, ry, rw, rh, mx, my, mw, mh)) {
-				rectangle.setOutlineColor(sf::Color::Yellow);
-			}
-			else {
-				rectangle.setOutlineColor(sf::Color::Black);
-			}
-		}
-
-		if (Geometry::circleOverlapsRectangle(cx, cy, cr, mx, my, mw, mh)) {
-			circle.setOutlineColor(sf::Color::Red);
-		}
-		else {
-			if (Geometry::circleIntersectsRectangle(cx, cy, cr, mx, my, mw, mh)) {
-				circle.setOutlineColor(sf::Color::Yellow);
-			}
-			else {
-				circle.setOutlineColor(sf::Color::Black);
-			}
-		}
-
-		window->draw(circle);
-		window->draw(rectangle);
-
-		window->display();
+		//tree.draw(window);
+		window.display();
 	}
 
 	return 0;

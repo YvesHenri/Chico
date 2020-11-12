@@ -7,7 +7,7 @@
 class BackgroundSystem final : public ecs::System
 {
 public:
-	explicit BackgroundSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
+	explicit BackgroundSystem(sf::RenderWindow& window) : window(window) {
 		TextureStore::get("grid.png").setRepeated(true);
 		background.setTexture(TextureStore::get("grid.png"));
 		background.setTextureRect(sf::IntRect(0, 0, 100000, 100000));
@@ -15,10 +15,10 @@ public:
 	}
 
 	void update(float delta) override {
-		window->draw(background);
+		window.draw(background);
 	}
 
 private:
 	sf::Sprite background;
-	std::shared_ptr<sf::RenderWindow> window;
+	sf::RenderWindow& window;
 };

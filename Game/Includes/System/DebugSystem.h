@@ -13,7 +13,7 @@
 class DebugSystem : public ecs::System
 {
 public:
-	explicit DebugSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
+	explicit DebugSystem(sf::RenderWindow& window) : window(window) {
 		auto cartesianColor = sf::Color::Black;
 		text.setFont(FontStore::get("Carlito.ttf"));
 		text.setCharacterSize(16U);
@@ -28,16 +28,16 @@ public:
 	}
 
 	void update(float dt) override {
-		auto fixed = window->getDefaultView();
-		auto current = window->getView();
+		auto fixed = window.getDefaultView();
+		auto current = window.getView();
 		auto fps = 1.f / dt;
 
 		if (fps < minFPS) {
 			minFPS = fps;
 		}
 
-		window->setTitle("FPS: " + std::to_string(fps) + " - Min: " + std::to_string(minFPS));
-		window->setView(fixed);
+		window.setTitle("FPS: " + std::to_string(fps) + " - Min: " + std::to_string(minFPS));
+		window.setView(fixed);
 
 		entities->each<Motion, Transform, Body>([&](auto& entity, auto& motion, auto& transform, auto& body) {			
 			// Player stats
@@ -51,11 +51,11 @@ public:
 			}
 
 			// Cartesian plane
-			//window->draw(xaxis, 2, sf::PrimitiveType::Lines);
-			//window->draw(yaxis, 2, sf::PrimitiveType::Lines);
+			//window.draw(xaxis, 2, sf::PrimitiveType::Lines);
+			//window.draw(yaxis, 2, sf::PrimitiveType::Lines);
 		});
 
-		window->setView(current);
+		window.setView(current);
 	}
 
 private:
@@ -63,7 +63,7 @@ private:
 		text.setString(string);
 		text.setFillColor(color);
 		text.setPosition(x, y);
-		window->draw(text);
+		window.draw(text);
 	}
 
 private:
@@ -71,5 +71,5 @@ private:
 	sf::Text text;
 	sf::Vertex xaxis[2];
 	sf::Vertex yaxis[2];
-	std::shared_ptr<sf::RenderWindow> window;
+	sf::RenderWindow& window;
 };

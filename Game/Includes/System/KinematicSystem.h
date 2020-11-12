@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cmath>
 #include <Engine/Entities/System/System.hpp>
 
 #include "../Message/Weather.h"
@@ -11,8 +10,6 @@
 class KinematicSystem : public ecs::SystemListener<Weather>
 {
 public:
-	explicit KinematicSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {}
-
 	void update(float time) override {
 		entities->each<Transform, Motion, Body>([&](auto& e, Transform& transform, Motion& motion, Body& body) {
 			auto terrainFriction = 20.f; // 1 is no friction
@@ -41,5 +38,4 @@ private:
 	float windStrenght = 0.f;
 	float windAngle = 0.f;
 	math::Vector windForce;
-	std::shared_ptr<sf::RenderWindow> window;
 };

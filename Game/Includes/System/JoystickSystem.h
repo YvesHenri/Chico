@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SFML/Window/Mouse.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <Engine/Entities/System/System.hpp>
 
 #include "../Component/Motion.h"
@@ -12,7 +11,7 @@
 class JoystickSystem : public ecs::System
 {
 public:
-	explicit JoystickSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {}
+	explicit JoystickSystem(sf::RenderWindow& window) : window(window) {}
 
 	void update(float time) override {
 		entities->each<Joystick, Motion, Body, Transform>([&](auto& entity, auto& joystick, auto& motion, auto& body, auto& transform) {
@@ -54,8 +53,8 @@ public:
 			}
 			*/
 
-			auto mouse = sf::Mouse::getPosition(*window.get());
-			auto world = window->mapPixelToCoords(mouse);
+			auto mouse = sf::Mouse::getPosition(window);
+			auto world = window.mapPixelToCoords(mouse);
 			auto seek = 0.1f;
 
 			auto worldVector = math::Vector(world.x, world.y);
@@ -73,5 +72,5 @@ public:
 	}
 
 private:
-	std::shared_ptr<sf::RenderWindow> window;
+	sf::RenderWindow& window;
 };

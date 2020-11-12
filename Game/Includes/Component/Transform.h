@@ -6,6 +6,6 @@ struct Transform
 
 	float x, y, z = 0.f;
 
-	float dx, dy; // Destination (target)
-	float tx, ty; // Tile coordinates
+	//float dx, dy; // Destination (target)
+	//float tx, ty; // Tile coordinates
 };

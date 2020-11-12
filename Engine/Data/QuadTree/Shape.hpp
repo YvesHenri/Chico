@@ -1,6 +1,7 @@
-#pragma once
+#ifndef DATA_QUADTREE_SHAPE_HPP
+#define DATA_QUADTREE_SHAPE_HPP
 
-#include "../Geometry.hpp"
+#include "../../Geometry.hpp"
 
 namespace qdt
 {
@@ -15,12 +16,17 @@ namespace qdt
             this->y = y;
         }
 
+        virtual bool fits(const Shape& shape) const;
         virtual bool fits(float x, float y, float radius) const = 0;
         virtual bool fits(float x, float y, float width, float height) const = 0;
+        
+        virtual bool overlaps(const Shape& shape) const;
         virtual bool overlaps(float x, float y, float radius) const = 0;
         virtual bool overlaps(float x, float y, float width, float height) const = 0;
+        
+        virtual bool intersects(const Shape& shape) const;
         virtual bool intersects(float x, float y, float radius) const = 0;
-        virtual bool intersects(float x, float y, float width, float height) const = 0;
+        virtual bool intersects(float x, float y, float width, float height) const = 0;        
 
         float x;
         float y;
@@ -103,4 +109,48 @@ namespace qdt
         float width;
         float height;
     };
+
+    bool Shape::fits(const Shape& shape) const {
+        // Circle
+        if (auto circle = dynamic_cast<const Circle*>(&shape)) {
+            return fits(circle->x, circle->y, circle->radius);
+        }
+
+        // Rectangle
+        if (auto rectangle = dynamic_cast<const Rectangle*>(&shape)) {
+            return fits(rectangle->x, rectangle->y, rectangle->width, rectangle->height);
+        }
+
+        throw "Unknown shape";
+    }
+
+    bool Shape::overlaps(const Shape& shape) const {
+        // Circle
+        if (auto circle = dynamic_cast<const Circle*>(&shape)) {
+            return overlaps(circle->x, circle->y, circle->radius);
+        }
+
+        // Rectangle
+        if (auto rectangle = dynamic_cast<const Rectangle*>(&shape)) {
+            return overlaps(rectangle->x, rectangle->y, rectangle->width, rectangle->height);
+        }
+
+        throw "Unknown shape";
+    }
+
+    bool Shape::intersects(const Shape& shape) const {
+        // Circle
+        if (auto circle = dynamic_cast<const Circle*>(&shape)) {
+            return intersects(circle->x, circle->y, circle->radius);
+        }
+
+        // Rectangle
+        if (auto rectangle = dynamic_cast<const Rectangle*>(&shape)) {
+            return intersects(rectangle->x, rectangle->y, rectangle->width, rectangle->height);
+        }
+
+        throw "Unknown shape";
+    }
 }
+
+#endif

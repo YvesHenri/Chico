@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -93,6 +93,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Dependencies\Includes</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4250</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,6 +166,7 @@
     <ClInclude Include="Includes\Component\Render.h" />
     <ClInclude Include="Includes\Component\Transform.h" />
     <ClInclude Include="Includes\Component\Motion.h" />
+    <ClInclude Include="Includes\DQuadTree.hpp" />
     <ClInclude Include="Includes\Message\Collision.h" />
     <ClInclude Include="Includes\Message\Explosion.h" />
     <ClInclude Include="Includes\Message\LoadedMessage.h" />
@@ -184,8 +186,6 @@
     <ClInclude Include="Includes\Log.h" />
     <ClInclude Include="Includes\System\BackgroundSystem.h" />
     <ClInclude Include="Includes\System\CameraSystem.h" />
-    <ClInclude Include="Includes\System\CollisionDetectionSystem.h" />
-    <ClInclude Include="Includes\System\CollisionResolverSystem.h" />
     <ClInclude Include="Includes\System\CollisionSystem.h" />
     <ClInclude Include="Includes\System\DebugSystem.h" />
     <ClInclude Include="Includes\System\JoystickSystem.h" />

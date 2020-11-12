@@ -1,10 +1,9 @@
 #pragma once
 
-#include <cmath>
+#include <Engine/Data/QuadTree/QuadTree.hpp>
 #include <Engine/Entities/System/System.hpp>
 #include <Engine/Entities/Component/Message/EntityAdded.hpp>
 #include <Engine/Entities/Component/Message/EntityRemoved.hpp>
-#include <Engine/Data/QuadTree.hpp>
 
 #include "../Message/Collision.h"
 #include "../Component/Transform.h"
@@ -14,17 +13,49 @@
 class CollisionSystem final : public ecs::SystemListener<EntityAdded, EntityRemoved>
 {
 public:
-	CollisionSystem(const std::shared_ptr<sf::RenderWindow>& window) : quadTree(0.f, 0.f, 400.f, 300.f), window(window) {}
+	explicit CollisionSystem(sf::RenderWindow& window) : quadTree(0.f, 0.f, window.getView().getSize().x, window.getView().getSize().y), window(window) {}
 
 	void update(float dt) override {
-		std::vector<std::shared_ptr<qdt::Node>> candidates;
+		std::vector<std::shared_ptr<qdt::CircleObject>> candidates;
 
+		// Viewport
+		auto vl = window.getView().getCenter().x - window.getView().getSize().x / 2.f;
+		auto vt = window.getView().getCenter().y - window.getView().getSize().y / 2.f;
+		auto vr = vl + window.getView().getSize().x;
+		auto vb = vt + window.getView().getSize().y;
+
+		// Reset tree
 		quadTree.clear();
+
+		// Rebuild tree
 		entities->each<Motion, Transform, Body>([&](auto& entity, auto& motion, auto& transform, auto& body) {
-			//quadTree.addCircle(transform.x, transform.y, body.radius);
+			quadTree.addCircle(entity.id(), transform.x, transform.y, body.radius);
 		});
 
-		quadTree.query(0.f, 0.f, 0.f, 0.f, candidates);
+		// Fetch objects
+		quadTree.queryCircles(vl, vt, vr, vb, candidates);
+
+		// Dispatch collisions
+		for (auto& left : candidates) {
+			for (auto& right : candidates) {
+				if (left->id != right->id) {
+					if (left->intersects(right->x, right->y, right->radius)) {
+						
+						auto& t1 = entities->component<Transform>(left->id);
+						auto& t2 = entities->component<Transform>(right->id);
+
+						float distance = std::sqrtf((left->x - right->x) * (left->x - right->x) + (left->y - right->y) * (left->y - right->y));						
+						float displacement = 0.5f * (distance - left->radius - right->radius); // 0.5 means half displacement for each circle
+
+						// Displace balls away (normalize direction by distance)
+						t1.x -= displacement * (t1.x - t2.x) / distance;
+						t1.y -= displacement * (t1.y - t2.y) / distance;
+						t2.x += displacement * (t1.x - t2.x) / distance;
+						t2.y += displacement * (t1.y - t2.y) / distance;
+					}
+				}
+			}
+		}
 	}
 
 	void handle(const EntityAdded& message) override {
@@ -34,7 +65,7 @@ public:
 		if (entities->has<Transform, Body>(message.entityId)) {
 			auto body = entities->component<Body>(message.entityId);
 			auto transform = entities->component<Transform>(message.entityId);
-			//quadTree.addCircle(transform.x, transform.y, body.radius);
+			quadTree.addCircle(message.entityId, transform.x, transform.y, body.radius);
 		}
 	}
 
@@ -43,7 +74,7 @@ public:
 	}
 
 	void handle(const Collision& message) {
-		float dist = distance(message.t1, message.t2);
+		float dist = std::sqrtf((message.t1.x - message.t2.x) * (message.t1.x - message.t2.x) + (message.t1.y - message.t2.y) * (message.t1.y - message.t2.y));
 
 		// Normal
 		float nx = (message.t2.x - message.t1.x) / dist;
@@ -70,18 +101,13 @@ public:
 		message.m1.velocity.y = ty * dpt1 + ny * m1;
 		message.m2.velocity.x = tx * dpt2 + nx * m2;
 		message.m2.velocity.y = ty * dpt2 + ny * m2;
+
+		// Update rotations
+		//message.t1.rotation = std::atan2f(message.m1.velocity.y, message.m1.velocity.x) * 57.2958f;
+		//message.t2.rotation = std::atan2f(message.m2.velocity.y, message.m2.velocity.x) * 57.2958f;
 	}
 
 private:
-	bool collides(const Transform& t1, const Transform& t2, const Body& b1, const Body& b2) {
-		return std::fabs((t1.x - t2.x) * (t1.x - t2.x) + (t1.y - t2.y) * (t1.y - t2.y)) <= (b1.radius + b2.radius) * (b1.radius + b2.radius);
-	}
-
-	float distance(const Transform& t1, const Transform& t2) {
-		return std::sqrtf((t1.x - t2.x) * (t1.x - t2.x) + (t1.y - t2.y) * (t1.y - t2.y));
-	}
-
-private:
-	QuadTree quadTree;
-	std::shared_ptr<sf::RenderWindow> window;
+	qdt::QuadTree quadTree;
+	sf::RenderWindow& window;
 };

@@ -12,7 +12,7 @@
 class RenderSystem : public ecs::System
 {
 public:
-	explicit RenderSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window) {
+	explicit RenderSystem(sf::RenderWindow& window) : window(window) {
 		text.setFont(FontStore::get("Carlito.ttf"));
 		text.setCharacterSize(24U);
 		text.setFillColor(sf::Color::Black);
@@ -45,13 +45,13 @@ public:
 			line.setSize(sf::Vector2f(body.radius + 16.f, 0.f));
 			line.setRotation(motion.velocity.angle().degrees());
 
-			window->draw(shape);
-			window->draw(text);
-			window->draw(line);
+			window.draw(shape);
+			window.draw(text);
+			window.draw(line);
 		});
 	}
 
 private:
 	sf::Text text;
-	std::shared_ptr<sf::RenderWindow> window;
+	sf::RenderWindow& window;
 };

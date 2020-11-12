@@ -148,10 +148,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Data\Quad.hpp" />
-    <ClInclude Include="Data\QuadNode.hpp" />
-    <ClInclude Include="Data\QuadShape.hpp" />
-    <ClInclude Include="Data\QuadTree.hpp" />
+    <ClInclude Include="Data\QuadTree\Quad.hpp" />
+    <ClInclude Include="Data\QuadTree\Object.hpp" />
+    <ClInclude Include="Data\QuadTree\Shape.hpp" />
+    <ClInclude Include="Data\QuadTree\QuadTree.hpp" />
     <ClInclude Include="Entities\Component\Message\ComponentAdded.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollection.hpp" />
     <ClInclude Include="Entities\Component\ComponentCollectionIntersection.hpp" />

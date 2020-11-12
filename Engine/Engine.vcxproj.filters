@@ -99,16 +99,16 @@
     <ClInclude Include="Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Quad.hpp">
+    <ClInclude Include="Data\QuadTree\Quad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\QuadShape.hpp">
+    <ClInclude Include="Data\QuadTree\QuadTree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\QuadTree.hpp">
+    <ClInclude Include="Data\QuadTree\Object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\QuadNode.hpp">
+    <ClInclude Include="Data\QuadTree\Shape.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

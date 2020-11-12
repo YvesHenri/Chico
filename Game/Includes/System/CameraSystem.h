@@ -12,10 +12,10 @@
 class CameraSystem final : public ecs::SystemListener<Explosion, ComponentAdded<Camera>>
 {
 public:
-	explicit CameraSystem(const std::shared_ptr<sf::RenderWindow>& window) : window(window), random(-1.f, 1.f) {}
+	explicit CameraSystem(sf::RenderWindow& window) : window(window), random(-1.f, 1.f) {}
 
 	void update(float delta) {
-		auto view = window->getView();
+		auto view = window.getView();
 
 		entities->each<Camera, Transform>([&](auto& entity, auto& camera, auto& transform) {
 			// Lerp positions for smooth chasing
@@ -41,7 +41,7 @@ public:
 			view.setCenter(x, y);
 		});
 
-		window->setView(view);
+		window.setView(view);
 	}
 
 	void handle(const Explosion& explosion) {
@@ -79,5 +79,5 @@ private:
 	float currentShakeDuration = 0.f; // If any
 	std::default_random_engine randomEngine;
 	std::uniform_real_distribution<float> random;
-	std::shared_ptr<sf::RenderWindow> window;
+	sf::RenderWindow& window;
 };

@@ -89,12 +89,6 @@
     <ClInclude Include="Includes\System\DebugSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Includes\System\CollisionDetectionSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Includes\System\CollisionResolverSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Includes\System\CameraSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Includes\System\CollisionSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\DQuadTree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
